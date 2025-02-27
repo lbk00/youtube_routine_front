@@ -1,26 +1,35 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if(kIsWeb) {
-    // Initialize Firebase
-    await Firebase.initializeApp(options : const  FirebaseOptions(
-        apiKey: "AIzaSyBXaf4sUBCgS2QPpT686g3U7a3meG1gya0",
-        authDomain: "routine-d955d.firebaseapp.com",
-        projectId: "routine-d955d",
-        storageBucket: "routine-d955d.firebasestorage.app",
-        messagingSenderId: "460553624244",
-        appId: "1:460553624244:web:a456d75ee7d57187e515e1",
-        measurementId: "G-73GCW5F0M9"
-    ));
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
+
+  if (kIsWeb) {
+    // Web에서는 FirebaseOptions을 사용하여 초기화
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: dotenv.env['API_KEY']!,
+        authDomain: dotenv.env['AUTH_DOMAIN']!,
+        projectId: dotenv.env['PROJECT_ID']!,
+        storageBucket: dotenv.env['STORAGE_BUCKET']!,
+        messagingSenderId: dotenv.env['MESSAGING_SENDER_ID']!,
+        appId: dotenv.env['APP_ID']!,
+        measurementId: dotenv.env['MEASUREMENT_ID'],
+      ),
+    );
   } else {
     await Firebase.initializeApp();
   }
+
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -141,3 +150,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+final firebaseConfig = {
+  "apiKey": dotenv.env['API_KEY'],
+  "authDomain": dotenv.env['AUTH_DOMAIN'],
+  "projectId": dotenv.env['PROJECT_ID'],
+  "storageBucket": dotenv.env['STORAGE_BUCKET'],
+  "messagingSenderId": dotenv.env['MESSAGING_SENDER_ID'],
+  "appId": dotenv.env['APP_ID'],
+  "measurementId": dotenv.env['MEASUREMENT_ID'],
+};
