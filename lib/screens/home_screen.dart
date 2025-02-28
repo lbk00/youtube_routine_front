@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:youtube_routine_front/screens/add_alarm_screen.dart';
+import 'package:youtube_routine_front/screens/side_menu.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<bool> alarmStates = [true, true, true]; // 토글 상태 저장 리스트
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,16 +21,29 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontSize: 35, fontWeight: FontWeight.bold),
         ),
         actions: [
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              '편집',
-              style: TextStyle(color: Colors.orange, fontSize: 18),
-            ),
-          ),
           IconButton(
             icon: Icon(Icons.add, color: Colors.orange, size: 30),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (context) => AddAlarmScreen(),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.orange, size: 30),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  child: SideMenu(),
+                ),
+              );
+            },
+
           ),
         ],
         elevation: 0,
@@ -34,25 +56,25 @@ class HomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('수면 | 기상', style: TextStyle(color: Colors.grey, fontSize: 18)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade800,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  child: Text('설정', style: TextStyle(color: Colors.orange)),
-                ),
               ],
             ),
           ),
           Divider(color: Colors.grey.shade800, thickness: 1),
           Expanded(
-            child: ListView(
-              children: [
-                AlarmTile(time: '오전 8:00', description: '알람, 주중', isActive: true),
-                AlarmTile(time: '오전 8:20', description: '알람, 매일', isActive: true),
-                AlarmTile(time: '오전 8:50', description: '알람, 주말', isActive: true),
-              ],
+            child: ListView.builder(
+              itemCount: alarmStates.length,
+              itemBuilder: (context, index) {
+                return AlarmTile(
+                  time: ['오전 8:00', '오전 8:20', '오전 8:50'][index],
+                  description: ['알람, 주중', '알람, 매일', '알람, 주말'][index],
+                  isActive: alarmStates[index],
+                  onToggle: (value) {
+                    setState(() {
+                      alarmStates[index] = value;
+                    });
+                  },
+                );
+              },
             ),
           ),
           Divider(color: Colors.grey.shade800, thickness: 1),
@@ -76,11 +98,13 @@ class AlarmTile extends StatelessWidget {
   final String time;
   final String description;
   final bool isActive;
+  final ValueChanged<bool> onToggle;
 
   const AlarmTile({
     required this.time,
     required this.description,
     required this.isActive,
+    required this.onToggle,
   });
 
   @override
@@ -112,7 +136,7 @@ class AlarmTile extends StatelessWidget {
           ),
           Switch(
             value: isActive,
-            onChanged: (value) {},
+            onChanged: onToggle,
             activeColor: Colors.green,
           ),
         ],
