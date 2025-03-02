@@ -47,14 +47,14 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
           ),
         ),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: Alignment(1.0, -0.8),
           child: SlideTransition(
             position: _animation,
             child: Container(
               width: MediaQuery.of(context).size.width * 0.6,
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height * 0.4,
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: Colors.white, // 밝은 테마 적용
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
@@ -67,32 +67,32 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50),
+                  SizedBox(height: 10),
                   Padding(
                     padding: EdgeInsets.all(20),
                     child: Text(
-                      '설정 메뉴',
+                      '설정',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black87,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Divider(color: Colors.grey),
+                  Divider(color: Colors.grey.shade300),
                   ListTile(
-                    leading: Icon(Icons.notifications, color: Colors.white),
-                    title: Text('어두운 테마', style: TextStyle(color: Colors.white)),
+                    leading: Icon(Icons.notifications, color: Colors.black87),
+                    title: Text('어두운 테마', style: TextStyle(color: Colors.black87)),
                     onTap: _closeMenu,
                   ),
                   ListTile(
-                    leading: Icon(Icons.settings, color: Colors.white),
-                    title: Text('앱 설정', style: TextStyle(color: Colors.white)),
+                    leading: Icon(Icons.settings, color: Colors.black87),
+                    title: Text('사용 방법', style: TextStyle(color: Colors.black87)),
                     onTap: _closeMenu,
                   ),
                   ListTile(
-                    leading: Icon(Icons.info, color: Colors.white),
-                    title: Text('앱 정보', style: TextStyle(color: Colors.white)),
+                    leading: Icon(Icons.info, color: Colors.black87),
+                    title: Text('앱 정보', style: TextStyle(color: Colors.black87)),
                     onTap: _closeMenu,
                   ),
                 ],
