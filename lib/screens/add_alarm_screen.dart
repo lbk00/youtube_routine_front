@@ -28,13 +28,13 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
   // 요일 목록 (영어 이름으로 API에 넘김)
   // ✅ UI에서는 한글, API에서는 영어로 변환하도록 매핑
   final Map<String, String> daysMapping = {
+    "일": "Sunday",
     "월": "Monday",
     "화": "Tuesday",
     "수": "Wednesday",
     "목": "Thursday",
     "금": "Friday",
     "토": "Saturday",
-    "일": "Sunday",
   };
 
   /// 입력된 값으로 API 요청 보내기
@@ -95,31 +95,14 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
         final responseData = jsonDecode(response.body);
         print("✅ 루틴 저장 성공: $responseData");
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("루틴이 저장되었습니다.")),
-        );
         Navigator.pop(context, responseData);
       } else {
         print("❌ 루틴 저장 실패: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("루틴 저장 실패: ${response.statusCode}")),
-        );
       }
     } catch (error) {
       print("❌ 오류 발생: $error");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("네트워크 오류 발생")),
-      );
     }
   }
-
-  /// ✅ Snackbar 알림 메시지 출력
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -168,8 +151,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                       });
                     },
                     children: ['오전', '오후']
-                        .map((e) => Center(child: Text(e, style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold))))
-                        .toList(),
+                        .map((e) => Center(child: Text(e, style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)))).toList(),
                   ),
                 ),
                 Expanded(
@@ -221,21 +203,20 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                   hintText: youtubeUrlError ?? '링크 입력', // ✅ 오류 발생 시 메시지로 변경
-                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Colors.grey), // ✅ 오류 발생 시 빨간색
+                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Colors.grey),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.grey), // ✅ 테두리 색상 변경
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey), // ✅ 기본은 blueGrey
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.grey),
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blue), // ✅ 포커스 시에도 빨간색 유지
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey , width: 2.0), // ✅ 포커스도 blueGrey
                   ),
                 ),
               ),
             ),
           ),
-
 
           Divider(color: Colors.grey[300]),
 
@@ -250,14 +231,27 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                   hintText: '내용 입력',
-                  border: OutlineInputBorder(),
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 기본 테두리 blueGrey
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 비활성화 시 blueGrey
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueGrey, width: 2.0), // ✅ 클릭(포커스) 시에도 blueGrey 유지
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red), // ✅ 에러 발생 시만 빨간색
+                  ),
                 ),
               ),
             ),
           ),
           Divider(color: Colors.grey[300]),
 
-          // 요일 선택 (여러 개 선택 가능)
+
+          // 요일 선택
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Column(
@@ -267,8 +261,8 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                   children: [
                     Text("요일 선택", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                     SizedBox(width: 8), // ✅ 간격 추가
-                    if (daysError != null) // ✅ 오류 발생 시 표시
-                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 14)),
+                    if (daysError != null)
+                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 14)), // ✅ 오류 메시지 빨간색
                   ],
                 ),
                 SizedBox(height: 10),
@@ -279,7 +273,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                     return ChoiceChip(
                       label: Text(day, style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontSize: 16)),
                       selected: isSelected,
-                      selectedColor: Colors.blueGrey,
+                      selectedColor: Colors.blueGrey, // ✅ 선택된 색상 blueGrey
                       backgroundColor: Colors.grey[300],
                       showCheckmark: false,
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -290,9 +284,8 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                           } else {
                             selectedDays.remove(day);
                           }
-                          // ✅ 선택하면 오류 메시지 제거
                           if (selectedDays.isNotEmpty) {
-                            daysError = null;
+                            daysError = null; // ✅ 선택하면 오류 메시지 제거
                           }
                         });
                       },
@@ -310,7 +303,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
             title: Text('매 주 반복', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             trailing: Switch(
               value: isRepeatEnabled,
-              activeColor: Colors.blueGrey,
+              activeColor: Colors.blueGrey, // ✅ blueGrey로 통일
               onChanged: (value) {
                 setState(() {
                   isRepeatEnabled = value;
@@ -323,4 +316,5 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
       ),
     );
   }
+
 }
