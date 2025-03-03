@@ -1,16 +1,125 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 
 class AddAlarmScreen extends StatefulWidget {
+  final String fcmToken; // 각 사용자의 FCM 토큰
+
+  const AddAlarmScreen({Key? key, required this.fcmToken}) : super(key: key);
+
   @override
   _AddAlarmScreenState createState() => _AddAlarmScreenState();
 }
 
 class _AddAlarmScreenState extends State<AddAlarmScreen> {
-  int selectedHour = 7;
-  int selectedMinute = 30;
-  String selectedPeriod = '오전';
+  int selectedHour = 8;
+  int selectedMinute = 0;
+  String selectedPeriod = '오후';
   bool isRepeatEnabled = false;
+  TextEditingController youtubeUrlController = TextEditingController();
+  TextEditingController contentController = TextEditingController();
+  List<String> selectedDays = []; // 선택한 요일 리스트
+
+  // ✅ 오류 메시지 상태
+  String? youtubeUrlError;
+  String? daysError;
+
+  // 요일 목록 (영어 이름으로 API에 넘김)
+  // ✅ UI에서는 한글, API에서는 영어로 변환하도록 매핑
+  final Map<String, String> daysMapping = {
+    "월": "Monday",
+    "화": "Tuesday",
+    "수": "Wednesday",
+    "목": "Thursday",
+    "금": "Friday",
+    "토": "Saturday",
+    "일": "Sunday",
+  };
+
+  /// 입력된 값으로 API 요청 보내기
+  Future<void> _saveRoutine() async {
+    bool isValid = true;
+    // ✅ 입력값 검증 (유튜브 URL & 요일 선택 필수)
+    setState(() {
+      // ✅ 유튜브 URL 검증
+      if (youtubeUrlController.text.isEmpty) {
+        youtubeUrlError = "URL을 입력하세요.";
+        isValid = false;
+      } else {
+        youtubeUrlError = null;
+      }
+
+      // ✅ 요일 선택 검증
+      if (selectedDays.isEmpty) {
+        daysError = "요일을 선택하세요.";
+        isValid = false;
+      } else {
+        daysError = null;
+      }
+    });
+
+    if (!isValid) return;
+
+    // ✅ 한글 요일을 영어로 변환
+    List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
+
+    // 12시간제를 24시간제로 변환
+    int hour = selectedHour;
+    if (selectedPeriod == '오후' && hour != 12) {
+      hour += 12;
+    } else if (selectedPeriod == '오전' && hour == 12) {
+      hour = 0; // 오전 12시는 00:00으로 변환
+    }
+    String routineTime = "${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}";
+
+    final url = Uri.parse("http://10.0.2.2:8080/api/routines/create/${widget.fcmToken}");
+    final Map<String, dynamic> requestBody = {
+      "days": englishDays,
+      "routineTime": routineTime,
+      "youtubeLink": youtubeUrlController.text.isNotEmpty
+          ? youtubeUrlController.text
+          : "https://youtube.com",
+      "content": contentController.text,
+      "repeatFlag": isRepeatEnabled,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        print("✅ 루틴 저장 성공: $responseData");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("루틴이 저장되었습니다.")),
+        );
+        Navigator.pop(context, responseData);
+      } else {
+        print("❌ 루틴 저장 실패: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("루틴 저장 실패: ${response.statusCode}")),
+        );
+      }
+    } catch (error) {
+      print("❌ 오류 발생: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("네트워크 오류 발생")),
+      );
+    }
+  }
+
+  /// ✅ Snackbar 알림 메시지 출력
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +133,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 상단 헤더
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -33,12 +143,14 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
               ),
               Text('루틴 추가', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
               TextButton(
-                onPressed: () {},
+                onPressed: _saveRoutine, // 저장 버튼 클릭 시 API 호출
                 child: Text('저장', style: TextStyle(color: Colors.black, fontSize: 18 , fontWeight: FontWeight.bold)),
               ),
             ],
           ),
           Divider(color: Colors.grey[300]),
+
+          // 시간 선택 영역 (오전/오후, 시, 분)
           Container(
             height: 200,
             color: Colors.grey[200],
@@ -55,7 +167,9 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                         selectedPeriod = index == 0 ? '오전' : '오후';
                       });
                     },
-                    children: ['오전', '오후'].map((e) => Center(child: Text(e, style: TextStyle(color: Colors.black, fontSize: 22 , fontWeight: FontWeight.bold)))).toList(),
+                    children: ['오전', '오후']
+                        .map((e) => Center(child: Text(e, style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold))))
+                        .toList(),
                   ),
                 ),
                 Expanded(
@@ -68,7 +182,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                         selectedHour = index + 1;
                       });
                     },
-                    children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(color: Colors.black, fontSize: 22 , fontWeight: FontWeight.bold)))),
+                    children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)))),
                   ),
                 ),
                 Expanded(
@@ -81,53 +195,132 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                         selectedMinute = index;
                       });
                     },
-                    children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(color: Colors.black, fontSize: 22 , fontWeight: FontWeight.bold)))),
+                    children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)))),
                   ),
                 ),
               ],
             ),
           ),
           SizedBox(height: 20),
-          Expanded(
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text('반복', style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold)),
-                  trailing: Text('안 함', style: TextStyle(color: Colors.grey , fontWeight: FontWeight.bold)),
-                  onTap: () {},
-                ),
-                Divider(color: Colors.grey[300]),
-                ListTile(
-                  title: Text('레이블', style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold)),
-                  trailing: Text('알람', style: TextStyle(color: Colors.grey , fontWeight: FontWeight.bold)),
-                  onTap: () {},
-                ),
-                Divider(color: Colors.grey[300]),
-                ListTile(
-                  title: Text('사운드', style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold)),
-                  trailing: Text('래디얼', style: TextStyle(color: Colors.grey , fontWeight: FontWeight.bold)),
-                  onTap: () {},
-                ),
-                Divider(color: Colors.grey[300]),
-                ListTile(
-                  title: Text('다시 알림', style: TextStyle(color: Colors.black , fontWeight: FontWeight.bold)),
-                  trailing: Switch(
-                    value: isRepeatEnabled,
-                    activeColor: Colors.blueGrey,
-                    onChanged: (value) {
-                      setState(() {
-                        isRepeatEnabled = value;
 
-                      });
-                    },
+          // 유튜브 URL 입력란
+          ListTile(
+            title: Text('유튜브 URL', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            trailing: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextField(
+                controller: youtubeUrlController,
+                onChanged: (value) {
+                  setState(() {
+                    if (value.isNotEmpty) {
+                      youtubeUrlError = null; // ✅ 값 입력 시 오류 메시지 초기화
+                    }
+                  });
+                },
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  hintText: youtubeUrlError ?? '링크 입력', // ✅ 오류 발생 시 메시지로 변경
+                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Colors.grey), // ✅ 오류 발생 시 빨간색
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.grey), // ✅ 테두리 색상 변경
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blue), // ✅ 포커스 시에도 빨간색 유지
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+
+          Divider(color: Colors.grey[300]),
+
+          // 내용 입력란
+          ListTile(
+            title: Text('내용', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            trailing: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextField(
+                controller: contentController,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  hintText: '내용 입력',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ),
+          Divider(color: Colors.grey[300]),
+
+          // 요일 선택 (여러 개 선택 가능)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text("요일 선택", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    SizedBox(width: 8), // ✅ 간격 추가
+                    if (daysError != null) // ✅ 오류 발생 시 표시
+                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 14)),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: daysMapping.keys.map((day) {
+                    final isSelected = selectedDays.contains(day);
+                    return ChoiceChip(
+                      label: Text(day, style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontSize: 16)),
+                      selected: isSelected,
+                      selectedColor: Colors.blueGrey,
+                      backgroundColor: Colors.grey[300],
+                      showCheckmark: false,
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedDays.add(day);
+                          } else {
+                            selectedDays.remove(day);
+                          }
+                          // ✅ 선택하면 오류 메시지 제거
+                          if (selectedDays.isNotEmpty) {
+                            daysError = null;
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
                 ),
               ],
             ),
           ),
+
+          Divider(color: Colors.grey[300]),
+
+          // 매주 반복 스위치
+          ListTile(
+            title: Text('매 주 반복', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            trailing: Switch(
+              value: isRepeatEnabled,
+              activeColor: Colors.blueGrey,
+              onChanged: (value) {
+                setState(() {
+                  isRepeatEnabled = value;
+                });
+              },
+            ),
+          ),
+          Divider(color: Colors.grey[300]),
         ],
       ),
     );
   }
 }
-
