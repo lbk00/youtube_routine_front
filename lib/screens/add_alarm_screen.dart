@@ -122,12 +122,12 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
             children: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('취소', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text('취소', style: TextStyle( fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Text('루틴 추가', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
               TextButton(
                 onPressed: _saveRoutine, // 저장 버튼 클릭 시 API 호출
-                child: Text('저장', style: TextStyle(color: Colors.black, fontSize: 18 , fontWeight: FontWeight.bold)),
+                child: Text('저장', style: TextStyle( fontSize: 18 , fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -187,69 +187,31 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
 
           // 유튜브 URL 입력란
           ListTile(
-            title: Text('유튜브 URL', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            title: Text('유튜브 URL', style: TextStyle(fontWeight: FontWeight.bold)),
             trailing: SizedBox(
               width: 200,
               height: 35,
               child: TextField(
                 controller: youtubeUrlController,
-                onChanged: (value) {
-                  setState(() {
-                    if (value.isNotEmpty) {
-                      youtubeUrlError = null; // ✅ 값 입력 시 오류 메시지 초기화
-                    }
-                  });
-                },
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  hintText: youtubeUrlError ?? '링크 입력', // ✅ 오류 발생 시 메시지로 변경
-                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Colors.grey),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey), // ✅ 기본은 blueGrey
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey , width: 2.0), // ✅ 포커스도 blueGrey
-                  ),
-                ),
+                decoration: InputDecoration(border: OutlineInputBorder()),
               ),
             ),
           ),
-
           Divider(color: Colors.grey[300]),
 
-          // 내용 입력란
+          // ✅ 내용 입력란
           ListTile(
-            title: Text('내용', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            title: Text('내용', style: TextStyle(fontWeight: FontWeight.bold)),
             trailing: SizedBox(
               width: 200,
               height: 35,
               child: TextField(
                 controller: contentController,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  hintText: '내용 입력',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 기본 테두리 blueGrey
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 비활성화 시 blueGrey
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey, width: 2.0), // ✅ 클릭(포커스) 시에도 blueGrey 유지
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red), // ✅ 에러 발생 시만 빨간색
-                  ),
-                ),
+                decoration: InputDecoration(border: OutlineInputBorder()),
               ),
             ),
           ),
           Divider(color: Colors.grey[300]),
-
 
           // 요일 선택
           Padding(
