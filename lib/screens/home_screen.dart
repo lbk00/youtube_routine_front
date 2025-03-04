@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:youtube_routine_front/screens/add_alarm_screen.dart';
 import 'package:youtube_routine_front/screens/side_menu.dart';
 import 'package:youtube_routine_front/screens/modify_alarm_screen.dart';
@@ -21,20 +20,23 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchAlarms(); // ✅ 앱 실행 시 API 호출
   }
 
+  /// ✅ 모든 루틴 조회
   Future<void> fetchAlarms() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/routines/user/fcm1'));
 
     if (response.statusCode == 200) {
-      // ✅ UTF-8 디코딩 적용 (한글 깨짐 방지)
       final decodedData = utf8.decode(response.bodyBytes);
       List<dynamic> data = json.decode(decodedData);
 
       setState(() {
         alarms = data.map((item) => {
+          'id': item['id'], // ✅ 루틴 ID 추가
           'time': item['routineTime'], // ⏰ 백엔드에서 가져온 시간
           'description': item['content'], // 📝 백엔드에서 가져온 설명
           'days': item['days'] as List<dynamic>, // 📅 백엔드에서 가져온 요일 리스트
           'isActive': item['active'], // ✅ ON/OFF 상태
+          'youtubeLink': item['youtubeLink'], // 🎥 유튜브 링크
+          'repeatFlag': item['repeatFlag'], // 🔁 반복 여부
         }).toList();
 
         // ✅ ON/OFF 상태 리스트 초기화
@@ -101,19 +103,32 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: alarms.length,
               separatorBuilder: (context, index) => Divider(color: Colors.grey.shade300, thickness: 1),
               itemBuilder: (context, index) {
+                final alarm = alarms[index];
                 return GestureDetector(
                   onTap: () {
+                    final routine = {
+                      'id': alarm['id'],
+                      'time': alarm['time'] ?? '00:00', // ✅ Null 체크
+                      'description': alarm['description'] ?? '', // ✅ Null 체크
+                      'days': alarm['days'] ?? [], // ✅ Null 체크
+                      'isActive': alarm['isActive'] ?? false, // ✅ Null 체크
+                      'youtubeLink': alarm['youtubeLink'] ?? '', // ✅ Null 체크
+                      'repeatFlag': alarm['repeatFlag'] ?? false, // ✅ Null 체크
+                    };
+
                     showModalBottomSheet(
                       context: context,
-                      backgroundColor: Colors.transparent,
-                      isScrollControlled: true,
-                      builder: (context) => ModifyAlarmScreen(),
+                      isScrollControlled: true,  // ✅ 화면을 꽉 채울 수 있도록 설정
+                      backgroundColor: Colors.transparent, // ✅ 둥근 모서리 유지
+                      builder: (context) => ModifyAlarmScreen(routine: routine),
                     );
                   },
+
+
                   child: AlarmTile(
-                    time: alarms[index]['time'], // ✅ API에서 받아온 시간
-                    description: alarms[index]['description'], // ✅ API에서 받아온 설명
-                    days: alarms[index]['days'].cast<String>(), // ✅ 요일 정보 전달
+                    time: alarm['time'], // ✅ API에서 받아온 시간
+                    description: alarm['description'], // ✅ API에서 받아온 설명
+                    days: alarm['days'].cast<String>(), // ✅ 요일 정보 전달
                     isActive: alarmStates[index], // ✅ ON/OFF 상태
                     onToggle: (value) {
                       setState(() {
@@ -131,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 // ✅ 알람 개별 항목 위젯
 class AlarmTile extends StatelessWidget {
   final String time;
@@ -190,9 +206,7 @@ class AlarmTile extends StatelessWidget {
                 ),
               ],
             ),
-
             SizedBox(height: 8), // ✅ 간격 추가
-
             // ✅ 요일 정보 추가 (월, 화, 수, 목, 금 형태, 스타일 적용)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -220,6 +234,3 @@ class AlarmTile extends StatelessWidget {
     );
   }
 }
-
-
-
