@@ -30,13 +30,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         alarms = data.map((item) => {
-          'id': item['id'], // ✅ 루틴 ID 추가
-          'time': item['routineTime'], // ⏰ 백엔드에서 가져온 시간
-          'description': item['content'], // 📝 백엔드에서 가져온 설명
-          'days': item['days'] as List<dynamic>, // 📅 백엔드에서 가져온 요일 리스트
-          'isActive': item['active'], // ✅ ON/OFF 상태
-          'youtubeLink': item['youtubeLink'], // 🎥 유튜브 링크
-          'repeatFlag': item['repeatFlag'], // 🔁 반복 여부
+          'id': item['id'], //  루틴 ID 추가
+          'time': item['routineTime'], //  백엔드에서 가져온 시간
+          'description': item['content'], //  백엔드에서 가져온 설명
+          'days': item['days'] as List<dynamic>, //  백엔드에서 가져온 요일 리스트
+          'isActive': item['active'], //  ON/OFF 상태
+          'youtubeLink': item['youtubeLink'], //  유튜브 링크
+          'repeatFlag': item['repeatFlag'], //  반복 여부
         }).toList();
 
         // ✅ ON/OFF 상태 리스트 초기화
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Divider(color: Colors.grey.shade300, thickness: 3),
           Expanded(
             child: alarms.isEmpty
-                ? Center(child: CircularProgressIndicator()) // ✅ 데이터 로딩 중이면 로딩 표시
+                ? Center(child: CircularProgressIndicator()) // 데이터 로딩 중이면 로딩 표시
                 : ListView.separated(
               itemCount: alarms.length,
               separatorBuilder: (context, index) => Divider(color: Colors.grey.shade300, thickness: 1),
@@ -108,28 +108,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     final routine = {
                       'id': alarm['id'],
-                      'time': alarm['time'] ?? '00:00', // ✅ Null 체크
-                      'description': alarm['description'] ?? '', // ✅ Null 체크
-                      'days': alarm['days'] ?? [], // ✅ Null 체크
-                      'isActive': alarm['isActive'] ?? false, // ✅ Null 체크
-                      'youtubeLink': alarm['youtubeLink'] ?? '', // ✅ Null 체크
-                      'repeatFlag': alarm['repeatFlag'] ?? false, // ✅ Null 체크
+                      'time': alarm['time'] ?? '00:00', // Null 체크
+                      'description': alarm['description'] ?? '', //  Null 체크
+                      'days': alarm['days'] ?? [], //  Null 체크
+                      'isActive': alarm['isActive'] ?? false, //  Null 체크
+                      'youtubeLink': alarm['youtubeLink'] ?? '', //  Null 체크
+                      'repeatFlag': alarm['repeatFlag'] ?? false, //  Null 체크
                     };
 
                     showModalBottomSheet(
                       context: context,
-                      isScrollControlled: true,  // ✅ 화면을 꽉 채울 수 있도록 설정
-                      backgroundColor: Colors.transparent, // ✅ 둥근 모서리 유지
+                      isScrollControlled: true,  //  화면을 꽉 채울 수 있도록 설정
+                      backgroundColor: Colors.transparent, //  둥근 모서리 유지
                       builder: (context) => ModifyAlarmScreen(routine: routine),
                     );
                   },
 
 
                   child: AlarmTile(
-                    time: alarm['time'], // ✅ API에서 받아온 시간
-                    description: alarm['description'], // ✅ API에서 받아온 설명
-                    days: alarm['days'].cast<String>(), // ✅ 요일 정보 전달
-                    isActive: alarmStates[index], // ✅ ON/OFF 상태
+                    time: alarm['time'], //  API에서 받아온 시간
+                    description: alarm['description'], //  API에서 받아온 설명
+                    days: alarm['days'].cast<String>(), //  요일 정보 전달
+                    isActive: alarmStates[index], //  ON/OFF 상태
                     onToggle: (value) {
                       setState(() {
                         alarmStates[index] = value;
@@ -147,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ✅ 알람 개별 항목 위젯
+//  알람 개별 항목 위젯
 class AlarmTile extends StatelessWidget {
   final String time;
   final String description;
@@ -155,7 +155,7 @@ class AlarmTile extends StatelessWidget {
   final bool isActive;
   final ValueChanged<bool> onToggle;
 
-  // ✅ 영어 요일을 한 글자 한글로 변환하는 Map
+  //  영어 요일을 한 글자 한글로 변환하는 Map
   static const Map<String, String> dayTranslations = {
     "Sunday": "일",
     "Monday": "월",
@@ -183,7 +183,7 @@ class AlarmTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ 시간 + 내용 (같은 줄에 배치)
+            //  시간 + 내용 (같은 줄에 배치)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -206,14 +206,14 @@ class AlarmTile extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 8), // ✅ 간격 추가
-            // ✅ 요일 정보 추가 (월, 화, 수, 목, 금 형태, 스타일 적용)
+            SizedBox(height: 8), //  간격 추가
+            //  요일 정보 추가 (월, 화, 수, 목, 금 형태, 스타일 적용)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: days.map((day) {
-                String koreanDay = dayTranslations[day] ?? day; // ✅ 영어 → 한글 변환
+                String koreanDay = dayTranslations[day] ?? day; //  영어 → 한글 변환
                 return Container(
-                  width: 32, height: 32, // ✅ 크기 고정 (너무 길어지지 않게)
+                  width: 32, height: 32, //  크기 고정 (너무 길어지지 않게)
                   margin: EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
