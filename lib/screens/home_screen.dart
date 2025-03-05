@@ -20,6 +20,17 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchAlarms(); // ✅ 앱 실행 시 API 호출
   }
 
+  String formatTime(String routineTime) {
+    List<String> parts = routineTime.split(':');
+    int hour = int.parse(parts[0]);
+    int minute = int.parse(parts[1]);
+
+    String period = hour < 12 ? "오전" : "오후"; // ✅ 12시 이전이면 AM, 이후면 PM
+    int hour12 = hour % 12 == 0 ? 12 : hour % 12; // ✅ 0시는 12로, 12시는 그대로 유지
+
+    return "$period ${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+  }
+
   /// ✅ 모든 루틴 조회
   Future<void> fetchAlarms() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/routines/user/fcm1'));
@@ -31,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         alarms = data.map((item) => {
           'id': item['id'], //  루틴 ID 추가
-          'time': item['routineTime'], //  백엔드에서 가져온 시간
+          'time': formatTime(item['routineTime']),
           'description': item['content'], //  백엔드에서 가져온 설명
           'days': item['days'] as List<dynamic>, //  백엔드에서 가져온 요일 리스트
           'isActive': item['active'], //  ON/OFF 상태
@@ -60,15 +71,22 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: Colors.blueGrey, size: 30),
-            onPressed: () {
-              showModalBottomSheet(
+            onPressed: () async {
+              final result = await showModalBottomSheet(
                 context: context,
                 backgroundColor: Colors.transparent,
                 isScrollControlled: true,
+                useRootNavigator: true, // ✅ 추가
                 builder: (context) => AddAlarmScreen(fcmToken: 'fcm1'),
               );
+
+              if (result == true) {
+                fetchAlarms(); // ✅ 루틴 저장 후 자동 갱신
+              }
             },
           ),
+
+
           IconButton(
             icon: Icon(Icons.settings, color: Colors.blueGrey, size: 30),
             onPressed: () {
@@ -118,12 +136,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     showModalBottomSheet(
                       context: context,
-                      isScrollControlled: true,  //  화면을 꽉 채울 수 있도록 설정
-                      backgroundColor: Colors.transparent, //  둥근 모서리 유지
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
                       builder: (context) => ModifyAlarmScreen(routine: routine),
-                    );
+                    ).then((result) {
+                      if (result == true) {
+                        fetchAlarms(); // ✅ 루틴 수정 , 삭제 후 자동 갱신
+                      }
+                    });
                   },
-
 
                   child: AlarmTile(
                     time: alarm['time'], //  API에서 받아온 시간
