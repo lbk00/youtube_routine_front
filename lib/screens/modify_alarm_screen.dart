@@ -255,7 +255,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                                 selectedPeriod = index == 0 ? '오전' : '오후';
                               });
                             },
-                            children: ['오전', '오후'].map((e) => Center(child: Text(e, style: TextStyle(fontSize: 22)))).toList(),
+                            children: ['오전', '오후'].map((e) => Center(child: Text(e, style: TextStyle(fontSize: 22 , fontWeight: FontWeight.bold)))).toList(),
                           ),
                         ),
                         Expanded(
@@ -267,7 +267,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                                 selectedHour = index + 1;
                               });
                             },
-                            children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(fontSize: 22)))),
+                            children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)))),
                           ),
                         ),
                         Expanded(
@@ -279,7 +279,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                                 selectedMinute = index;
                               });
                             },
-                            children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(fontSize: 22)))),
+                            children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)))),
                           ),
                         ),
                       ],
