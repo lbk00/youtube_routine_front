@@ -14,10 +14,15 @@ class ModifyAlarmScreen extends StatefulWidget {
 }
 
 class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
+  late FixedExtentScrollController hourController;
+  late FixedExtentScrollController minuteController;
+  late FixedExtentScrollController periodController;
+
   int selectedHour = 8;
   int selectedMinute = 0;
   String selectedPeriod = '오전';
   bool isRepeatEnabled = false;
+
   TextEditingController youtubeUrlController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   List<String> selectedDays = [];
@@ -31,44 +36,72 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
   void initState() {
     super.initState();
 
-    // ✅ 기존 요일 값을 한글로 변환하여 selectedDays에 저장
+    // print("📌 [ModifyAlarmScreen] 받은 routineTime: ${widget.routine['routineTime']}");
+
+    // ✅ "routineTime"을 직접 사용하여 변환 (원본 값 사용)
+    _initializeTime(widget.routine['routineTime'] ?? '00:00');
+
+    // print("✅ 변환된 시간 - Hour: $selectedHour, Minute: $selectedMinute, Period: $selectedPeriod");
+
+    periodController = FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1);
+    hourController = FixedExtentScrollController(initialItem: selectedHour - 1);
+    minuteController = FixedExtentScrollController(initialItem: selectedMinute);
+
     selectedDays = (widget.routine['days'] as List<dynamic>? ?? [])
         .map<String>((day) => daysMapping.entries.firstWhere(
           (entry) => entry.value == day,
-      orElse: () => MapEntry("", ""), // 매칭되는 값이 없을 경우 빈 값 처리
+      orElse: () => MapEntry("", ""),
     ).key)
         .where((day) => day.isNotEmpty)
         .toList();
 
-    // ✅ 유튜브 링크 값 자동 입력 (없으면 기본값)
-    youtubeUrlController.text = (widget.routine['youtubeLink'] != null && widget.routine['youtubeLink'].isNotEmpty)
-        ? widget.routine['youtubeLink']
-        : 'https://youtube.com';
-
-    // ✅ 내용 자동 입력
+    youtubeUrlController.text = widget.routine['youtubeLink'] ?? 'https://youtube.com';
     contentController.text = widget.routine['description'] ?? '';
-
-    // ✅ 매주 반복 값 설정
     isRepeatEnabled = widget.routine['repeatFlag'] ?? false;
+  }
 
-    // ✅ 24시간제 → 12시간제 변환
-    String timeString = widget.routine['time'] ?? '00:00';
+
+  void _initializeTime(String timeString) {
+    if (timeString.isEmpty || !timeString.contains(":")) {
+      timeString = "00:00"; // 기본값 설정
+    }
+
     List<String> timeParts = timeString.split(":");
     int hour = int.tryParse(timeParts[0]) ?? 0;
-    selectedMinute = int.tryParse(timeParts[1]) ?? 0;
+    int minute = int.tryParse(timeParts[1]) ?? 0;
 
-    if (hour >= 12) {
-      selectedPeriod = '오후';
-      selectedHour = (hour == 12) ? 12 : hour - 12;
-    } else {
-      selectedPeriod = '오전';
-      selectedHour = (hour == 0) ? 12 : hour;
-    }
+    setState(() {
+      selectedMinute = minute;
+
+      if (hour == 0) {
+        selectedPeriod = '오전';
+        selectedHour = 12; // 00:00 → 오전 12시
+      } else if (hour < 12) {
+        selectedPeriod = '오전';
+        selectedHour = hour; // ✅ 변환 없이 그대로 유지
+      } else if (hour == 12) {
+        selectedPeriod = '오후';
+        selectedHour = 12;
+      } else {
+        selectedPeriod = '오후';
+        selectedHour = hour - 12;
+      }
+    });
+
+    periodController = FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1);
+    hourController = FixedExtentScrollController(initialItem: selectedHour - 1);
+    minuteController = FixedExtentScrollController(initialItem: selectedMinute);
   }
+
+
+
+
+
+
 
   // 루틴 수정
   Future<void> _updateRoutine(int routineId) async {
-    final url = Uri.parse("http://10.0.2.2:8080/api/routines/$routineId"); // ✅ 선택한 루틴 ID 기반 업데이트 요청
+    final url = Uri.parse("http://10.0.2.2:8080/api/routines/$routineId");
 
     List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
 
@@ -77,15 +110,14 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
     if (selectedPeriod == '오후' && hour != 12) {
       hour += 12;
     } else if (selectedPeriod == '오전' && hour == 12) {
-      hour = 0; // 오전 12시는 00:00으로 변환
+      hour = 0;
     }
 
-    // ✅ 항상 두 자리로 표시 (ex: 08:05)
     String routineTime = "${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}";
 
     final Map<String, dynamic> requestBody = {
       "days": englishDays,
-      "routineTime": routineTime, // ✅ 변환된 시간 사용
+      "routineTime": routineTime,
       "youtubeLink": youtubeUrlController.text,
       "content": contentController.text,
       "repeatFlag": isRepeatEnabled,
@@ -100,7 +132,20 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
       if (response.statusCode == 200) {
         print("✅ 루틴 수정 성공");
-        Navigator.pop(context, true); // ✅ 성공하면 true 반환하여 홈 화면에서 fetchAlarms() 실행
+
+        // ✅ 수정된 데이터를 `widget.routine`에 반영
+        setState(() {
+          widget.routine['time'] = routineTime; // ✅ UI 업데이트
+          widget.routine['days'] = englishDays;
+          widget.routine['youtubeLink'] = youtubeUrlController.text;
+          widget.routine['description'] = contentController.text;
+          widget.routine['repeatFlag'] = isRepeatEnabled;
+
+          // ✅ 새로운 시간값을 반영하여 업데이트
+          _updateTimeState(routineTime);
+        });
+
+        Navigator.pop(context, true); // ✅ true 반환하여 홈 화면에서 fetchAlarms() 실행
       } else {
         print("❌ 루틴 수정 실패: ${response.body}");
       }
@@ -108,6 +153,33 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       print("❌ 오류 발생: $error");
     }
   }
+
+
+  void _updateTimeState(String timeString) {
+    List<String> timeParts = timeString.split(":");
+    int hour = int.tryParse(timeParts[0]) ?? 0;
+    int minute = int.tryParse(timeParts[1]) ?? 0;
+
+    setState(() {
+      selectedMinute = minute;
+
+      if (hour == 0) {
+        selectedPeriod = '오전';
+        selectedHour = 12; // 00:00 → 오전 12시
+      } else if (hour < 12) {
+        selectedPeriod = '오전';
+        selectedHour = hour;
+      } else if (hour == 12) {
+        selectedPeriod = '오후';
+        selectedHour = 12;
+      } else {
+        selectedPeriod = '오후';
+        selectedHour = hour - 12;
+      }
+    });
+  }
+
+
 
   // 루틴 삭제
   Future<void> _deleteRoutine(int routineId) async {
@@ -167,7 +239,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                   ),
                   Divider(color: Colors.grey[300]),
 
-                  // ✅ 시간 선택
+                  // ✅ 시간 선택 UI 수정
                   Container(
                     height: 200,
                     color: Colors.grey[200],
@@ -177,7 +249,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                         Expanded(
                           child: CupertinoPicker(
                             itemExtent: 40,
-                            scrollController: FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1),
+                            scrollController: periodController, // ✅ 컨트롤러 적용
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedPeriod = index == 0 ? '오전' : '오후';
@@ -189,7 +261,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                         Expanded(
                           child: CupertinoPicker(
                             itemExtent: 40,
-                            scrollController: FixedExtentScrollController(initialItem: selectedHour - 1),
+                            scrollController: hourController, // ✅ 컨트롤러 적용
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedHour = index + 1;
@@ -201,7 +273,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                         Expanded(
                           child: CupertinoPicker(
                             itemExtent: 40,
-                            scrollController: FixedExtentScrollController(initialItem: selectedMinute),
+                            scrollController: minuteController, // ✅ 컨트롤러 적용
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedMinute = index;
@@ -213,6 +285,8 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                       ],
                     ),
                   ),
+
+
                   SizedBox(height: 20),
 
                   // ✅ 유튜브 URL 입력란
