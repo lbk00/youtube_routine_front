@@ -21,15 +21,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String formatTime(String routineTime) {
+    if (routineTime.isEmpty || !routineTime.contains(":")) {
+      return "오전 12:00"; // 기본값
+    }
+
     List<String> parts = routineTime.split(':');
     int hour = int.parse(parts[0]);
     int minute = int.parse(parts[1]);
 
-    String period = hour < 12 ? "오전" : "오후"; // ✅ 12시 이전이면 AM, 이후면 PM
-    int hour12 = hour % 12 == 0 ? 12 : hour % 12; // ✅ 0시는 12로, 12시는 그대로 유지
+    String period = hour < 12 ? "오전" : "오후";
+    int hour12 = hour % 12 == 0 ? 12 : hour % 12; // 0시는 12로 변환
 
     return "$period ${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
   }
+
 
   /// ✅ 모든 루틴 조회
   Future<void> fetchAlarms() async {
@@ -40,23 +45,30 @@ class _HomeScreenState extends State<HomeScreen> {
       List<dynamic> data = json.decode(decodedData);
 
       setState(() {
-        alarms = data.map((item) => {
-          'id': item['id'], //  루틴 ID 추가
-          'time': formatTime(item['routineTime']),
-          'description': item['content'], //  백엔드에서 가져온 설명
-          'days': item['days'] as List<dynamic>, //  백엔드에서 가져온 요일 리스트
-          'isActive': item['active'], //  ON/OFF 상태
-          'youtubeLink': item['youtubeLink'], //  유튜브 링크
-          'repeatFlag': item['repeatFlag'], //  반복 여부
+        alarms = data.map((item) {
+          String rawTime = item['routineTime']; // ✅ 원본 시간값 저장
+          print("📌 API에서 받은 routineTime: $rawTime"); // 디버깅용 로그
+
+          return {
+            'id': item['id'],
+            'time': formatTime(rawTime), // ✅ 변환된 시간 (오전/오후 적용)
+            'routineTime': rawTime, // ✅ 원본 시간값 추가
+            'description': item['content'] ?? '',
+            'days': item['days'] as List<dynamic> ?? [],
+            'isActive': item['active'] ?? false,
+            'youtubeLink': item['youtubeLink'] ?? '',
+            'repeatFlag': item['repeatFlag'] ?? false,
+          };
         }).toList();
 
-        // ✅ ON/OFF 상태 리스트 초기화
         alarmStates = alarms.map((alarm) => alarm['isActive'] as bool).toList();
       });
     } else {
       throw Exception('Failed to load alarms');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -126,13 +138,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     final routine = {
                       'id': alarm['id'],
-                      'time': alarm['time'] ?? '00:00', // Null 체크
-                      'description': alarm['description'] ?? '', //  Null 체크
-                      'days': alarm['days'] ?? [], //  Null 체크
-                      'isActive': alarm['isActive'] ?? false, //  Null 체크
-                      'youtubeLink': alarm['youtubeLink'] ?? '', //  Null 체크
-                      'repeatFlag': alarm['repeatFlag'] ?? false, //  Null 체크
+                      'time': alarm['time'] ?? '00:00', // ✅ 변환된 시간 (오전/오후 적용)
+                      'routineTime': alarm['routineTime'] ?? '00:00', // ✅ 원본 24시간제 시간
+                      'description': alarm['description'] ?? '',
+                      'days': alarm['days'] ?? [],
+                      'isActive': alarm['isActive'] ?? false,
+                      'youtubeLink': alarm['youtubeLink'] ?? '',
+                      'repeatFlag': alarm['repeatFlag'] ?? false,
                     };
+
+                    // print("📌 [HomeScreen] ModifyAlarmScreen에 넘기는 routineTime: ${routine['routineTime']}");
 
                     showModalBottomSheet(
                       context: context,
@@ -145,6 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     });
                   },
+
 
                   child: AlarmTile(
                     time: alarm['time'], //  API에서 받아온 시간
@@ -224,6 +240,7 @@ class AlarmTile extends StatelessWidget {
                 Switch(
                   value: isActive,
                   onChanged: onToggle,
+                  activeColor: Colors.blueGrey,
                 ),
               ],
             ),
