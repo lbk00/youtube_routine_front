@@ -28,8 +28,8 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
   List<String> selectedDays = [];
 
   final Map<String, String> daysMapping = {
-    "일": "Sunday", "월": "Monday", "화": "Tuesday",
-    "수": "Wednesday", "목": "Thursday", "금": "Friday", "토": "Saturday",
+    "월": "Monday", "화": "Tuesday",
+    "수": "Wednesday", "목": "Thursday", "금": "Friday", "토": "Saturday", "일": "Sunday",
   };
 
   @override
@@ -208,13 +208,14 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Material(
+          color: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 배경 적용
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           child: SingleChildScrollView(
             controller: scrollController,
             child: Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 적용
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
@@ -225,106 +226,112 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context), // ✅ 단순히 화면 닫기 (취소 기능)
-                        child: Text('취소', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('취소', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-
-
-                      Text('루틴 수정', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text('루틴 수정', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
                       TextButton(
-                        onPressed: () => _updateRoutine(widget.routine['id']), // ✅ 루틴 ID 전달
-                        child: Text('저장', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
+                        onPressed: () => _updateRoutine(widget.routine['id']),
+                        child: Text('저장', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
-                  Divider(color: Colors.grey[300]),
+                  Divider(color: Theme.of(context).dividerColor), // ✅ 다크 모드 적용
 
                   // ✅ 시간 선택 UI 수정
                   Container(
                     height: 200,
-                    color: Colors.grey[200],
+                    color: Theme.of(context).cardColor, // ✅ 다크 모드 적용
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
                           child: CupertinoPicker(
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 적용
                             itemExtent: 40,
-                            scrollController: periodController, // ✅ 컨트롤러 적용
+                            scrollController: periodController,
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedPeriod = index == 0 ? '오전' : '오후';
                               });
                             },
-                            children: ['오전', '오후'].map((e) => Center(child: Text(e, style: TextStyle(fontSize: 22 , fontWeight: FontWeight.bold)))).toList(),
+                            children: ['오전', '오후'].map(
+                                  (e) => Center(child: Text(e, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 22, fontWeight: FontWeight.bold))),
+                            ).toList(),
                           ),
                         ),
                         Expanded(
                           child: CupertinoPicker(
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             itemExtent: 40,
-                            scrollController: hourController, // ✅ 컨트롤러 적용
+                            scrollController: hourController,
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedHour = index + 1;
                               });
                             },
-                            children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)))),
+                            children: List.generate(12, (index) => Center(child: Text("${index + 1}", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 22, fontWeight: FontWeight.bold)))),
                           ),
                         ),
                         Expanded(
                           child: CupertinoPicker(
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                             itemExtent: 40,
-                            scrollController: minuteController, // ✅ 컨트롤러 적용
+                            scrollController: minuteController,
                             onSelectedItemChanged: (index) {
                               setState(() {
                                 selectedMinute = index;
                               });
                             },
-                            children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)))),
+                            children: List.generate(60, (index) => Center(child: Text("${index.toString().padLeft(2, '0')}", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 22, fontWeight: FontWeight.bold)))),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-
-                  SizedBox(height: 20),
+                  Divider(color: Theme.of(context).dividerColor),
 
                   // ✅ 유튜브 URL 입력란
                   ListTile(
-                    title: Text('유튜브 URL', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text('유튜브 URL', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                     trailing: SizedBox(
                       width: 200,
-                      height: 40, // ✅ 높이를 통일하여 균형 맞춤
+                      height: 40,
                       child: TextField(
                         controller: youtubeUrlController,
-                        textAlignVertical: TextAlignVertical.center, // ✅ 텍스트 중앙 정렬
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10), // ✅ 위아래 패딩 균형 맞춤
-                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                          hintText: '링크 입력',
+                          hintStyle: TextStyle(color: Theme.of(context).hintColor),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Divider(color: Colors.grey[300]),
+                  Divider(color: Theme.of(context).dividerColor),
 
                   ListTile(
-                    title: Text('내용', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text('내용', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                     trailing: SizedBox(
                       width: 200,
-                      height: 40, // ✅ 높이 동일
+                      height: 40,
                       child: TextField(
                         controller: contentController,
-                        textAlignVertical: TextAlignVertical.center, // ✅ 텍스트 중앙 정렬
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10), // ✅ 패딩 조정
-                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                          hintText: '내용 입력',
+                          hintStyle: TextStyle(color: Theme.of(context).hintColor),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  Divider(color: Colors.grey[300]),
-
-                  Divider(color: Colors.grey[300]),
+                  Divider(color: Theme.of(context).dividerColor),
 
                   // ✅ 요일 선택
                   Padding(
@@ -332,24 +339,18 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("요일 선택", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: daysMapping.keys.map((day) {
                             final isSelected = selectedDays.contains(day);
                             return ChoiceChip(
-                              label: Text(
-                                day,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.black,
-                                  fontSize: 16,
-                                ),
-                              ),
+                              label: Text(day, style: TextStyle(color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16)),
                               selected: isSelected,
-                              selectedColor: Colors.blueGrey, // ✅ 선택 시 색상 blueGrey
-                              backgroundColor: Colors.grey[300], // ✅ 미선택 시 색상 grey[300]
-                              showCheckmark: false, // ✅ 체크 표시 제거
+                              selectedColor: Colors.blueGrey,
+                              backgroundColor: Theme.of(context).cardColor, // ✅ 다크 모드 적용
+                              showCheckmark: false,
                               padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               onSelected: (selected) {
                                 setState(() {
@@ -366,24 +367,34 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                       ],
                     ),
                   ),
-
-
-                  Divider(color: Colors.grey[300]),
+                  Divider(color: Theme.of(context).dividerColor),
 
                   // ✅ 매주 반복
                   ListTile(
-                    title: Text('매 주 반복', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text('매 주 반복', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                     trailing: Switch(
-                      value: isRepeatEnabled,
-                      activeColor: Colors.blueGrey,
-                      onChanged: (value) {
+                      value: isRepeatEnabled, // 추가 화면에서는 isRepeatEnabled 상태 사용
+                      onChanged: (bool newValue) {
                         setState(() {
-                          isRepeatEnabled = value;
+                          isRepeatEnabled = newValue;
                         });
                       },
-                    ),
+                      activeTrackColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.blue[800] // 다크 모드에서 활성화된 배경
+                          : Colors.blue[800], // 밝은 모드에서 활성화된 배경
+                      activeColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[300] // 다크 모드에서 활성화된 스위치 원 색상
+                          : Colors.white, // 밝은 모드에서 활성화된 스위치 원 색상
+                      inactiveTrackColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[500] // 다크 모드에서 비활성화된 배경
+                          : Colors.white, // 밝은 모드에서 비활성화된 배경
+                      inactiveThumbColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[800] // 다크 모드에서 비활성화된 원 색상
+                          : Colors.black, // 밝은 모드에서 비활성화된 원 색상
+                    )
+
                   ),
-                  Divider(color: Colors.grey[300]),
+                  Divider(color: Theme.of(context).dividerColor),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15.0),
                     child: Center(
@@ -400,7 +411,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                         ),
                       ),
                     ),
-                  ),
+                ),
                 ],
               ),
             ),
@@ -409,4 +420,5 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       },
     );
   }
+
 }
