@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:youtube_routine_front/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 
 void main() async {
@@ -29,25 +30,87 @@ void main() async {
     await Firebase.initializeApp();
   }
 
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeNotifier(),
+    child: const MyApp(),
+  ));
 }
 
+class ThemeNotifier extends ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  ThemeMode get themeMode => _themeMode;
+
+  void toggleTheme() {
+    _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+}
 
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'YouTube Routine',
-      theme: ThemeData(
-        fontFamily: GoogleFonts.notoSansKr().fontFamily,// Noto Sans KR 전체 적용
-        primaryColor: Colors.white,
-        scaffoldBackgroundColor: Colors.grey[100],
-      ),
-      home: HomeScreen(),
+    return Consumer<ThemeNotifier>(
+      builder: (context, themeNotifier, child) {
+        return MaterialApp(
+          title: 'YouTube Routine',
+          themeMode: themeNotifier.themeMode,
+          theme: ThemeData(
+            fontFamily: GoogleFonts.notoSansKr().fontFamily,
+            brightness: Brightness.light,
+            primaryColor: Colors.white,
+            scaffoldBackgroundColor: Colors.grey[100], // ✅ 배경색 밝게 유지
+            cardColor: Colors.white, // ✅ 카드 배경 밝게
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.blueGrey, // ✅ AppBar 배경 색
+              iconTheme: IconThemeData(color: Colors.blueGrey), // ✅ 아이콘 색상 조정
+              titleTextStyle: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(color: Colors.black), // ✅ 텍스트 기본 색상
+              bodyMedium: TextStyle(color: Colors.black87),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
+              secondary: Colors.teal, // ✅ 버튼 등의 포인트 컬러
+              onSurface: Colors.black, // ✅ 비활성화된 토글 색상
+            ),
+            dividerColor: Colors.grey[500],
+          ),
+
+            darkTheme: ThemeData(
+              fontFamily: GoogleFonts.notoSansKr().fontFamily,
+              brightness: Brightness.dark,
+              primaryColor: Colors.grey[900], // ✅ 너무 어둡지 않은 짙은 회색
+              scaffoldBackgroundColor: Colors.grey[850], // ✅ 배경을 살짝 밝은 짙은 회색으로 조정
+              cardColor: Colors.grey[800], // ✅ 카드 배경을 약간 밝게 조정
+
+              appBarTheme: AppBarTheme(
+                backgroundColor: Colors.grey[800], // ✅ AppBar도 완전 검은색이 아닌 짙은 회색
+                iconTheme: IconThemeData(color: Colors.white), // ✅ 아이콘 색상 유지
+                titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+
+              textTheme: TextTheme(
+                bodyLarge: TextStyle(color: Colors.white70), // ✅ 완전 흰색이 아닌 흰색70% (가독성 증가)
+                bodyMedium: TextStyle(color: Colors.white70), // ✅ 대비가 덜한 흰색60%
+                headlineSmall: TextStyle(color: Colors.white), // ✅ 헤드라인은 밝게 유지
+              ),
+              colorScheme: ColorScheme.dark(
+                primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
+                secondary: Colors.cyan, // ✅ 버튼 색상을 밝은 색으로 변경
+                onSurface: Colors.white60, // ✅ 비활성화된 토글 색상
+              ),
+
+              dividerColor: Colors.grey[700], // ✅ 구분선 색상도 너무 어둡지 않게 조정
+            ),
+
+          home: HomeScreen(),
+        );
+      },
     );
   }
 }
@@ -90,39 +153,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 테마 적용
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
@@ -130,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium, // ✅ 테마 적용
             ),
           ],
         ),
@@ -138,10 +176,12 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
+        backgroundColor: Theme.of(context).colorScheme.secondary, // ✅ 테마 적용
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
+
 }
 
 
