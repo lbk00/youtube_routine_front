@@ -68,6 +68,35 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  //  토글 버튼
+  Future<void> toggleRoutine(int routineId) async {
+    final url = Uri.parse("http://10.0.2.2:8080/api/routines/toggle/$routineId");
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        // print("✅ 루틴 활성 상태 변경 성공 (ID: $routineId)");
+
+        setState(() {
+          // ✅ alarms 리스트에서 해당 루틴의 isActive 상태를 반전
+          for (var alarm in alarms) {
+            if (alarm['id'] == routineId) {
+              alarm['isActive'] = !alarm['isActive'];
+              break;
+            }
+          }
+        });
+      } else {
+        print("❌ 루틴 활성 상태 변경 실패: ${response.body}");
+      }
+    } catch (error) {
+      print("❌ 오류 발생: $error");
+    }
+  }
 
 
   @override
@@ -161,18 +190,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
 
-
-                  child: AlarmTile(
-                    time: alarm['time'], //  API에서 받아온 시간
-                    description: alarm['description'], //  API에서 받아온 설명
-                    days: alarm['days'].cast<String>(), //  요일 정보 전달
-                    isActive: alarmStates[index], //  ON/OFF 상태
-                    onToggle: (value) {
-                      setState(() {
-                        alarmStates[index] = value;
-                      });
+                  child:
+                  AlarmTile(
+                    time: alarm['time'],
+                    description: alarm['description'],
+                    days: alarm['days'].cast<String>(),
+                    isActive: alarm['isActive'],
+                    onToggle: (bool newValue) { // ✅ bool 값을 받아서 toggleRoutine 호출
+                      toggleRoutine(alarm['id']);
                     },
                   ),
+
+
                 );
               },
             ),
@@ -239,9 +268,13 @@ class AlarmTile extends StatelessWidget {
                 ),
                 Switch(
                   value: isActive,
-                  onChanged: onToggle,
+                  onChanged: (bool newValue) {
+                    onToggle(newValue); // ✅ newValue를 넘겨서 실행하도록 수정
+                  },
                   activeColor: Colors.blueGrey,
                 ),
+
+
               ],
             ),
             SizedBox(height: 8), //  간격 추가
