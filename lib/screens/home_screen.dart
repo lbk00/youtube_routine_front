@@ -32,8 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String period = hour < 12 ? "오전" : "오후";
     int hour12 = hour % 12 == 0 ? 12 : hour % 12; // 0시는 12로 변환
 
-    return "$period ${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+    return "$period $hour12:${minute.toString().padLeft(2, '0')}";
   }
+
 
 
   /// ✅ 모든 루틴 조회
