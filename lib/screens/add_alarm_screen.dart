@@ -12,6 +12,8 @@ class AddAlarmScreen extends StatefulWidget {
   _AddAlarmScreenState createState() => _AddAlarmScreenState();
 }
 
+
+
 class _AddAlarmScreenState extends State<AddAlarmScreen> {
   int selectedHour = 8;
   int selectedMinute = 0;
@@ -62,7 +64,8 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
     if (!isValid) return;
 
     // ✅ 한글 요일을 영어로 변환
-    List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
+    List<String> englishDays = selectedDays.map((day) => daysMapping[day]!)
+        .toList();
 
     // 12시간제를 24시간제로 변환
     int hour = selectedHour;
@@ -71,9 +74,11 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
     } else if (selectedPeriod == '오전' && hour == 12) {
       hour = 0; // 오전 12시는 00:00으로 변환
     }
-    String routineTime = "${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')}";
+    String routineTime = "${hour.toString().padLeft(2, '0')}:${selectedMinute
+        .toString().padLeft(2, '0')}";
 
-    final url = Uri.parse("http://10.0.2.2:8080/api/routines/create/${widget.fcmToken}");
+    final url = Uri.parse(
+        "http://10.0.2.2:8080/api/routines/create/${widget.fcmToken}");
     final Map<String, dynamic> requestBody = {
       "days": englishDays,
       "routineTime": routineTime,
@@ -83,6 +88,24 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
       "content": contentController.text,
       "repeatFlag": isRepeatEnabled,
     };
+
+    void _showErrorDialog(String message) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("⚠️ 알림"),
+            content: Text(message),
+            actions: [
+              TextButton(
+                child: Text("확인"),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     try {
       final response = await http.post(
@@ -98,10 +121,16 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
         // ✅ true 값을 반환하여 HomeScreen에서 fetchAlarms() 실행되도록 수정
         Navigator.pop(context, true);
       } else {
-        print("❌ 루틴 저장 실패: ${response.body}");
+        // print("❌ 루틴 저장 실패: ${response.body}");
+
+        // ✅ 사용자에게 루틴 저장 실패 메시지 팝업
+        _showErrorDialog("루틴은 최대 10개까지 저장할 수 있습니다.");
       }
     } catch (error) {
       print("❌ 오류 발생: $error");
+
+      // ✅ 네트워크 오류 등 예외 발생 시 팝업 표시
+      _showErrorDialog("오류가 발생했습니다. 네트워크 상태를 확인해주세요.");
     }
   }
 
