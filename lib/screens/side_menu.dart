@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:youtube_routine_front/main.dart';
 
 class SideMenu extends StatefulWidget {
   @override
@@ -17,8 +19,8 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
       duration: Duration(milliseconds: 300),
     );
     _animation = Tween<Offset>(
-      begin: Offset(1.0, 0.0), // 화면 밖에서 시작
-      end: Offset(0.4, 0.0), // 오른쪽 벽에 딱 붙도록 설정
+      begin: Offset(1.0, 0.0),
+      end: Offset(0.4, 0.0),
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _controller.forward();
   }
@@ -35,15 +37,17 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+    final isDarkMode = themeNotifier.themeMode == ThemeMode.dark;
+
     return Stack(
       children: [
-        // 메뉴 바깥 터치 시 닫히도록 GestureDetector 추가
         GestureDetector(
-          onTap: _closeMenu, // 배경 터치 시 닫기
+          onTap: _closeMenu,
           child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            color: Colors.transparent, // 투명 배경으로 설정
+            color: Colors.transparent,
           ),
         ),
         Align(
@@ -54,7 +58,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               width: MediaQuery.of(context).size.width * 0.6,
               height: MediaQuery.of(context).size.height * 0.4,
               decoration: BoxDecoration(
-                color: Colors.white, // 밝은 테마 적용
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
                 boxShadow: [
                   BoxShadow(
@@ -73,26 +77,36 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                     child: Text(
                       '설정',
                       style: TextStyle(
-                        color: Colors.black87,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Divider(color: Colors.grey.shade300),
+                  Divider(color: Theme.of(context).dividerColor),
                   ListTile(
-                    leading: Icon(Icons.notifications, color: Colors.black87),
-                    title: Text('어두운 테마', style: TextStyle(color: Colors.black87)),
+                    leading: Icon(
+                      isDarkMode ? Icons.light_mode : Icons.dark_mode ,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    title: Text(
+                      isDarkMode ? '밝은 테마' : '어두운 테마',
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                    ),
+                      onTap: () {
+                        print("🌙 다크 모드 변경됨!");
+                        themeNotifier.toggleTheme();
+                        _closeMenu();
+                      }
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
+                    title: Text('사용 방법', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: _closeMenu,
                   ),
                   ListTile(
-                    leading: Icon(Icons.settings, color: Colors.black87),
-                    title: Text('사용 방법', style: TextStyle(color: Colors.black87)),
-                    onTap: _closeMenu,
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.info, color: Colors.black87),
-                    title: Text('앱 정보', style: TextStyle(color: Colors.black87)),
+                    leading: Icon(Icons.info, color: Theme.of(context).iconTheme.color),
+                    title: Text('앱 정보', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: _closeMenu,
                   ),
                 ],
