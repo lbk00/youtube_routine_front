@@ -94,7 +94,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                       onTap: () {
-                        print("🌙 다크 모드 변경됨!");
+                        // print("🌙 다크 모드 변경됨!");
                         themeNotifier.toggleTheme();
                         _closeMenu();
                       }
