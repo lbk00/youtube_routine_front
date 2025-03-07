@@ -154,7 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Divider(color: Colors.grey.shade300, thickness: 3),
           Expanded(
             child: alarms.isEmpty
-                ? Center(child: CircularProgressIndicator()) // 데이터 로딩 중이면 로딩 표시
+                ? Center(
+              child: Text(
+                "저장된 루틴이 없습니다.",
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+            )
                 : ListView.separated(
               itemCount: alarms.length,
               separatorBuilder: (context, index) => Divider(color: Colors.grey.shade300, thickness: 1),
@@ -250,18 +255,24 @@ class AlarmTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      time, // ⏰ 시간
-                      style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 10), // 간격 추가
-                    Text(
-                      description, // 📝 설명 (시간 옆에)
-                      style: TextStyle(fontSize: 22),
-                    ),
-                  ],
+                Expanded( // ✅ Row 내부에서 공간 조정 (overflow 방지)
+                  child: Row(
+                    children: [
+                      Text(
+                        time, // ⏰ 시간
+                        style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 10), // 간격 추가
+                      Expanded( // ✅ 설명이 길 경우 자동 줄바꿈 또는 생략 처리
+                        child: Text(
+                          description,
+                          style: TextStyle(fontSize: 22),
+                          overflow: TextOverflow.ellipsis, // ✅ 길 경우 ...으로 표시
+                          maxLines: 1, // ✅ 한 줄까지만 표시
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Switch(
                   value: isActive,
@@ -270,8 +281,6 @@ class AlarmTile extends StatelessWidget {
                   },
                   activeColor: Colors.blueGrey,
                 ),
-
-
               ],
             ),
             SizedBox(height: 8), //  간격 추가
@@ -300,10 +309,10 @@ class AlarmTile extends StatelessWidget {
                 );
               }).toList(),
             ),
-
           ],
         ),
       ),
     );
   }
+
 }
