@@ -103,12 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.add, color: Colors.blueGrey, size: 30),
+            icon: Icon(Icons.add, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               final result = await showModalBottomSheet(
                 context: context,
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
           IconButton(
-            icon: Icon(Icons.settings, color: Colors.blueGrey, size: 30),
+            icon: Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
             onPressed: () {
               showDialog(
                 context: context,
@@ -147,22 +147,21 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('저장된 루틴', style: TextStyle(color: Colors.black54, fontSize: 16)),
+                Text('저장된 루틴', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
               ],
             ),
           ),
-          Divider(color: Colors.grey.shade300, thickness: 3),
+          Divider(color: Colors.grey.shade600),
           Expanded(
             child: alarms.isEmpty
                 ? Center(
               child: Text(
                 "저장된 루틴이 없습니다.",
-                style: TextStyle(fontSize: 18, color: Colors.black54),
+                style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
             )
-                : ListView.separated(
+                : ListView.builder(
               itemCount: alarms.length,
-              separatorBuilder: (context, index) => Divider(color: Colors.grey.shade300, thickness: 1),
               itemBuilder: (context, index) {
                 final alarm = alarms[index];
                 return GestureDetector(
@@ -245,6 +244,7 @@ class AlarmTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).cardColor,
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -277,10 +277,24 @@ class AlarmTile extends StatelessWidget {
                 Switch(
                   value: isActive,
                   onChanged: (bool newValue) {
-                    onToggle(newValue); // ✅ newValue를 넘겨서 실행하도록 수정
+                    onToggle(newValue);
                   },
-                  activeColor: Colors.blueGrey,
-                ),
+                  activeTrackColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.blue[800] // 다크 모드에서 활성화된 배경
+                      : Colors.blue[800], // 밝은 모드에서 활성화된 배경
+                  activeColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[300] // 다크 모드에서 활성화된 스위치 원 색상
+                      : Colors.white, // 밝은 모드에서 활성화된 스위치 원 색상
+                  inactiveTrackColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[500] // 다크 모드에서 비활성화된 배경
+                      : Colors.white, // 밝은 모드에서 비활성화된 배경
+                  inactiveThumbColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[800] // 다크 모드에서 비활성화된 원 색상
+                      : Colors.black, // 밝은 모드에서 비활성화된 원 색상
+                )
+
+
+
               ],
             ),
             SizedBox(height: 8), //  간격 추가
@@ -297,13 +311,21 @@ class AlarmTile extends StatelessWidget {
                   width: 32, height: 32, //  크기 고정
                   margin: EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[400]  // ✅ 다크 모드에서는 밝은 회색 배경
+                        : Colors.grey[300],  // ✅ 라이트 모드에서는 기존 회색
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
                       koreanDay,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black87  // ✅ 다크 모드에서는 검은색 텍스트
+                            : Colors.black,    // ✅ 기본 모드에서도 가독성 유지
+                      ),
                     ),
                   ),
                 );
