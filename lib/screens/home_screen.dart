@@ -105,10 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(
-          '알람',
-          style: TextStyle(color: Colors.black87, fontSize: 35, fontWeight: FontWeight.bold),
-        ),
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: Colors.blueGrey, size: 30),
@@ -150,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('저장된 루틴 목록', style: TextStyle(color: Colors.black54, fontSize: 16)),
+                Text('저장된 루틴', style: TextStyle(color: Colors.black54, fontSize: 16)),
               ],
             ),
           ),
@@ -281,10 +277,14 @@ class AlarmTile extends StatelessWidget {
             //  요일 정보 추가 (월, 화, 수, 목, 금 형태, 스타일 적용)
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: days.map((day) {
+              children: [
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" // ✅ 고정된 순서
+              ]
+                  .where((day) => days.contains(day)) // ✅ 선택된 요일만 필터링
+                  .map((day) {
                 String koreanDay = dayTranslations[day] ?? day; //  영어 → 한글 변환
                 return Container(
-                  width: 32, height: 32, //  크기 고정 (너무 길어지지 않게)
+                  width: 32, height: 32, //  크기 고정
                   margin: EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -299,6 +299,7 @@ class AlarmTile extends StatelessWidget {
                 );
               }).toList(),
             ),
+
           ],
         ),
       ),
