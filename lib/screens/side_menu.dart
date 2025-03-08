@@ -149,7 +149,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
             position: _animation,
             child: Container(
               width: MediaQuery.of(context).size.width * 0.6,
-              height: MediaQuery.of(context).size.height * 0.4,
+              height: MediaQuery.of(context).size.height * 0.33,
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
@@ -164,7 +164,6 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 10),
                   Padding(
                     padding: EdgeInsets.all(20),
                     child: Text(
