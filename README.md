@@ -10,3 +10,7 @@
 - 조회된 루틴 목록에서 id로 객체 넘겨줘서 사용 or ( 현재 사용 중 )
 - 클릭한 루틴의 id로 get 메서드 호출하여 사용
 
+- gradle sync 문제
+1. run flutter clean 
+2. do the Gradle sync without flutter pub get and make necessary changes to native android code. 
+3. do pub get and run the app.
