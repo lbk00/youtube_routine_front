@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_routine_front/main.dart';
@@ -75,6 +76,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               _buildUsageStep("➌", "설정한 시간에 알림이 오면 클릭하여 저장된 유튜브 링크로 이동합니다.", stepColor),
               _buildUsageStep("➍", "토글 버튼을 통해 루틴을 ON/OFF 할 수 있습니다.", stepColor),
               _buildUsageStep("➎", "루틴은 최대 10개까지 저장 가능합니다.", stepColor),
+              _buildUsageStep("➏", "오전 12시는 자정, 오후 12시는 정오를 의미합니다.", stepColor),
             ],
           ),
           actions: [
@@ -205,7 +207,8 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                   ListTile(
                     leading: Icon(Icons.info, color: Theme.of(context).iconTheme.color),
                     title: Text('앱 정보', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    onTap: _closeMenu,
+                      // onTap: _closeMenu,
+                      onTap: () => getFCMToken(), // 임시 fcm 토큰 호출
                   ),
                 ],
               ),
@@ -215,4 +218,9 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
       ],
     );
   }
+}
+// 임시 함수
+Future<void> getFCMToken() async {
+  String? token = await FirebaseMessaging.instance.getToken();
+  print("FCM Token: $token");
 }
