@@ -5,7 +5,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:youtube_routine_front/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;  // HTTP 요청 라이브러리 추가
+import 'dart:convert';  // jsonEncode 사용을 위한 패키지 추가
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,11 +33,54 @@ void main() async {
     await Firebase.initializeApp();
   }
 
+  // 최초 실행 시 FCM 토큰을 가져와 사용자 등록
+  await checkFirstRunAndRegisterUser();
+
   runApp(ChangeNotifierProvider(
     create: (context) => ThemeNotifier(),
     child: const MyApp(),
   ));
 }
+
+
+Future<void> checkFirstRunAndRegisterUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isFirstRun = prefs.getBool('isFirstRun') ?? true;
+
+  if (isFirstRun) {
+    print("🚀 최초 실행 감지! FCM 토큰을 가져와서 사용자 등록");
+
+    // FCM 토큰 가져오기
+    String? fcmToken = await FirebaseMessaging.instance.getToken();
+    print("🔥 FCM Token: $fcmToken");
+
+    if (fcmToken != null) {
+      // 서버에 사용자 등록 API 호출
+      final response = await http.post(
+        Uri.parse("http://10.0.2.2:8080/api/users/register"),
+        body: jsonEncode({
+          "fcmToken": fcmToken,
+        }),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ 사용자 등록 성공!");
+
+        // 🚀 **FCM 토큰을 SharedPreferences에 저장**
+        await prefs.setString('fcmToken', fcmToken);
+
+        // 최초 실행이 끝났음을 저장
+        await prefs.setBool('isFirstRun', false);
+      } else {
+        print("❌ 사용자 등록 실패: ${response.body}");
+      }
+    }
+  } else {
+    print("ℹ️ 앱이 이미 실행된 적 있음, FCM 등록 생략");
+  }
+}
+
 
 class ThemeNotifier extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
