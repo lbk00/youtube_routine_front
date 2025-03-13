@@ -59,7 +59,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                 child: Text(
                   "📌 YouTube Routine 사용 방법",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: textColor, // ✅ 다크모드 대응
                   ),
