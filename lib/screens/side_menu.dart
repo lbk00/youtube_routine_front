@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_routine_front/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SideMenu extends StatefulWidget {
   @override
@@ -221,6 +222,19 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
 }
 // 임시 함수
 Future<void> getFCMToken() async {
+  // ✅ Firebase에서 새로운 FCM 토큰 가져오기
   String? token = await FirebaseMessaging.instance.getToken();
-  print("FCM Token: $token");
+  print("🔥 Firebase에서 가져온 FCM Token: $token");
+
+  // ✅ SharedPreferences에서 저장된 FCM 토큰 가져오기
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? savedToken = prefs.getString('fcmToken');
+
+  // ✅ 저장된 FCM 토큰과 새로 가져온 FCM 토큰 비교
+  if (savedToken == null) {
+    print("❌ SharedPreferences에 저장된 FCM Token 없음");
+  } else {
+    print("📌 SharedPreferences에 저장된 FCM Token: $savedToken");
+  }
+
 }
