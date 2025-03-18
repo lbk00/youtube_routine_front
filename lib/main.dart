@@ -17,6 +17,12 @@ void main() async {
   // .env 파일 로드
   await dotenv.load(fileName: "assets/.env");
 
+  // 기기를 세로 모드로 고정
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   if (kIsWeb) {
     // Web에서는 FirebaseOptions을 사용하여 초기화
     await Firebase.initializeApp(
