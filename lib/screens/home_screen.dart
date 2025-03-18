@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:youtube_routine_front/screens/add_alarm_screen.dart';
 import 'package:youtube_routine_front/screens/side_menu.dart';
 import 'package:youtube_routine_front/screens/modify_alarm_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -39,7 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// ✅ 모든 루틴 조회
   Future<void> fetchAlarms() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/routines/user/fcm1'));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? fcmToken = prefs.getString('fcmToken');
+
+    if (fcmToken == null) {
+      print("❌ 저장된 FCM 토큰이 없음!");
+      return;
+    }
+    // fcm 토큰으로 조회
+    final response = await http.get(Uri.parse('http://192.168.0.5:8080/api/routines/user/$fcmToken'));
 
     if (response.statusCode == 200) {
       final decodedData = utf8.decode(response.bodyBytes);
@@ -71,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //  토글 버튼
   Future<void> toggleRoutine(int routineId) async {
-    final url = Uri.parse("http://10.0.2.2:8080/api/routines/toggle/$routineId");
+    final url = Uri.parse("http://192.168.0.5:8080/api/routines/toggle/$routineId");
 
     try {
       final response = await http.put(
@@ -110,12 +119,22 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.add, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String? fcmToken = prefs.getString('fcmToken'); // 저장된 FCM 토큰 가져오기
+
+              if (fcmToken == null) {
+                print("❌ FCM 토큰이 존재하지 않음!");
+                return;
+              }
+
+              print("✅ AddAlarmScreen에 전달할 FCM Token: $fcmToken");
+
               final result = await showModalBottomSheet(
                 context: context,
                 backgroundColor: Colors.transparent,
                 isScrollControlled: true,
-                useRootNavigator: true, // ✅ 추가
-                builder: (context) => AddAlarmScreen(fcmToken: 'fcm1'),
+                useRootNavigator: true,
+                builder: (context) => AddAlarmScreen(fcmToken: fcmToken), // FCM 토큰 전달
               );
 
               if (result == true) {

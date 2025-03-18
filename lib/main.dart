@@ -42,10 +42,13 @@ void main() async {
 
 
   // 최초 실행 시 FCM 토큰을 가져와 사용자 등록
-  // await checkFirstRunAndRegisterUser();
+  // 비동기 실행하여 UI 스레드 차단 방지
+  Future.microtask(() async {
+    await checkFirstRunAndRegisterUser();
+  });
 
   // ✅ FCM 토큰이 변경될 때 업데이트 리스너 설정
-  // setupFcmTokenRefreshListener();
+  setupFcmTokenRefreshListener();
 
   runApp(ChangeNotifierProvider(
     create: (context) => ThemeNotifier(),
@@ -58,6 +61,8 @@ Future<void> checkFirstRunAndRegisterUser() async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirstRun = prefs.getBool('isFirstRun') ?? true;
+
+    print("🚀 앱 최초 실행 여부: $isFirstRun");
 
     if (isFirstRun) {
       print("🚀 최초 실행 감지! FCM 토큰을 가져와서 사용자 등록");
@@ -72,8 +77,9 @@ Future<void> checkFirstRunAndRegisterUser() async {
       }
 
       if (fcmToken != null) {
+        print("📡 서버에 FCM 토큰 등록 요청 중...");
         final response = await http.post(
-          Uri.parse("http://10.0.2.2:8080/api/users/register"),
+          Uri.parse("http://192.168.0.5:8080/api/users/register"),
           body: jsonEncode({"fcmToken": fcmToken}),
           headers: {"Content-Type": "application/json"},
         );
@@ -81,25 +87,46 @@ Future<void> checkFirstRunAndRegisterUser() async {
         if (response.statusCode == 200) {
           print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
           await prefs.setString('fcmToken', fcmToken);
+          await prefs.setBool('isFirstRun', false);
 
           // ✅ 저장 후 즉시 값을 다시 불러와 확인
           String? savedToken = prefs.getString('fcmToken');
-          print("🔄 SharedPreferences에 저장된 FCM 토큰: $savedToken");
-
-          await prefs.setBool('isFirstRun', false);
+          print("🔄 SharedPreferences에 저장된 FCM 토큰 확인: $savedToken");
         } else {
           print("❌ 사용자 등록 실패: ${response.body}");
         }
       }
     } else {
-      print("ℹ️ 앱이 이미 실행된 적 있음, 기존 FCM 토큰 사용");
+      print("ℹ️ 앱이 이미 실행된 적 있음, 기존 FCM 토큰 확인");
       String? existingToken = prefs.getString('fcmToken');
-      print("🔄 SharedPreferences에서 불러온 기존 FCM 토큰: $existingToken");
+
+      if (existingToken == null) {
+        print("❌ SharedPreferences에 FCM Token 없음! 새로 가져와 저장해야 함.");
+
+        // ✅ FCM 토큰 새로 가져오기
+        String? newFcmToken;
+        try {
+          newFcmToken = await FirebaseMessaging.instance.getToken();
+          print("🔥 새롭게 가져온 FCM Token: $newFcmToken");
+        } catch (e) {
+          print("❌ FCM 토큰 가져오기 실패: $e");
+          return;
+        }
+
+        if (newFcmToken != null) {
+          // ✅ 새로 가져온 토큰을 SharedPreferences에 저장
+          await prefs.setString('fcmToken', newFcmToken);
+          print("✅ SharedPreferences에 새로운 FCM 토큰 저장 완료!");
+        }
+      } else {
+        print("📌 SharedPreferences에 저장된 기존 FCM Token: $existingToken");
+      }
     }
   } catch (e) {
     print("❌ checkFirstRunAndRegisterUser() 실행 중 오류 발생: $e");
   }
 }
+
 
 
 
@@ -137,7 +164,7 @@ Future<void> updateFcmTokenToServer(String newToken) async {
 
   // ✅ 서버에 기존 토큰과 새로운 토큰 함께 전송
   final response = await http.put(
-    Uri.parse("http://10.0.2.2:8080/api/users/update-fcm"),
+    Uri.parse("http://192.168.0.5:8080/api/users/update-fcm"),
     body: jsonEncode({
       "oldFcmToken": oldToken,  // 기존 FCM 토큰
       "newFcmToken": newToken   // 새로운 FCM 토큰
