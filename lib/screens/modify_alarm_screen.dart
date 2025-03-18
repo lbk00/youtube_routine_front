@@ -101,7 +101,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
   // 루틴 수정
   Future<void> _updateRoutine(int routineId) async {
-    final url = Uri.parse("http://10.0.2.2:8080/api/routines/$routineId");
+    final url = Uri.parse("http://192.168.0.5:8080/api/routines/$routineId");
 
     List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
 
@@ -183,7 +183,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
   // 루틴 삭제
   Future<void> _deleteRoutine(int routineId) async {
-    final url = Uri.parse("http://10.0.2.2:8080/api/routines/$routineId"); // ✅ 루틴 ID 기반 삭제 요청
+    final url = Uri.parse("http://192.168.0.5:8080/api/routines/$routineId"); // ✅ 루틴 ID 기반 삭제 요청
 
     try {
       final response = await http.delete(url);
@@ -335,11 +335,11 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
                   // ✅ 요일 선택
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+                        Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,fontSize: 16  , fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

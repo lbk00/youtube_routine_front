@@ -78,7 +78,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
         .toString().padLeft(2, '0')}";
 
     final url = Uri.parse(
-        "http://10.0.2.2:8080/api/routines/create/${widget.fcmToken}");
+        "http://192.168.0.5:8080/api/routines/create/${widget.fcmToken}");
     final Map<String, dynamic> requestBody = {
       "days": englishDays,
       "routineTime": routineTime,
@@ -232,7 +232,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                   hintText: youtubeUrlError ?? '링크 입력', // ✅ 오류 발생 시 메시지로 변경
-                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Colors.grey),
+                  hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Theme.of(context).hintColor),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey), // ✅ 기본은 blueGrey
                   ),
@@ -283,16 +283,16 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
 
           // 요일 선택
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8), // ✅ 간격 추가
+                    Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,fontSize: 16 ,fontWeight: FontWeight.bold)),
+                    SizedBox(width: 8), // 간격 추가
                     if (daysError != null)
-                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 14)), // ✅ 오류 메시지 빨간색
+                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 16)), // ✅ 오류 메시지 빨간색
                   ],
                 ),
                 SizedBox(height: 10),
@@ -306,7 +306,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                       selectedColor: Colors.blueGrey, // ✅ 선택된 색상 blueGrey
                       backgroundColor: Theme.of(context).cardColor,
                       showCheckmark: false,
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 7, vertical: 5),
                       onSelected: (selected) {
                         setState(() {
                           if (selected) {
