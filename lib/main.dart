@@ -10,6 +10,9 @@ import 'package:http/http.dart' as http;  // HTTP 요청 라이브러리 추가
 import 'dart:convert';  // jsonEncode 사용을 위한 패키지 추가
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,11 +43,13 @@ void main() async {
     await Firebase.initializeApp();
   }
 
+  // 푸시 알림 설정
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // 최초 실행 시 FCM 토큰을 가져와 사용자 등록
+  // FCM 초기화 및 토큰 등록
   // 비동기 실행하여 UI 스레드 차단 방지
   Future.microtask(() async {
-    await checkFirstRunAndRegisterUser();
+    await setupFirebaseMessaging();
   });
 
   // ✅ FCM 토큰이 변경될 때 업데이트 리스너 설정
@@ -56,77 +61,132 @@ void main() async {
   ));
 }
 
+// 🔹 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  _handleMessage(message);
+}
 
-Future<void> checkFirstRunAndRegisterUser() async {
+//  Firebase 초기화 및 푸시 알림 리스너를 설정
+Future<void> setupFirebaseMessaging() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // 🔹 푸시 알림 권한 요청 (iOS)
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.denied) {
+    print("🔴 푸시 알림 권한이 거부됨!");
+    return;
+  }
+
+  print("✅ 푸시 알림 권한이 허용됨!");
+
+  // ✅ FCM 토큰 가져오기 및 저장
+  await _registerFcmToken();
+
+  // ✅ 포그라운드 알림 수신 리스너
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("📌 [푸시 알림 도착 - Foreground]");
+    _showNotification(message);
+  });
+
+  // ✅ 백그라운드 상태에서 알림 클릭 시 실행
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print("📌 [푸시 알림 클릭 - Background]");
+    _handleMessage(message);
+  });
+}
+
+// 🔹 FCM 토큰 저장 및 서버에 등록
+Future<void> _registerFcmToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? existingToken = prefs.getString('fcmToken');
+
+  // ✅ 새로운 FCM 토큰 가져오기
+  String? newFcmToken;
   try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isFirstRun = prefs.getBool('isFirstRun') ?? true;
-
-    print("🚀 앱 최초 실행 여부: $isFirstRun");
-
-    if (isFirstRun) {
-      print("🚀 최초 실행 감지! FCM 토큰을 가져와서 사용자 등록");
-
-      String? fcmToken;
-      try {
-        fcmToken = await FirebaseMessaging.instance.getToken();
-        print("🔥 가져온 FCM Token: $fcmToken");
-      } catch (e) {
-        print("❌ FCM 토큰 가져오기 실패: $e");
-        return;
-      }
-
-      if (fcmToken != null) {
-        print("📡 서버에 FCM 토큰 등록 요청 중...");
-        final response = await http.post(
-          Uri.parse("http://192.168.0.5:8080/api/users/register"),
-          body: jsonEncode({"fcmToken": fcmToken}),
-          headers: {"Content-Type": "application/json"},
-        );
-
-        if (response.statusCode == 200) {
-          print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
-          await prefs.setString('fcmToken', fcmToken);
-          await prefs.setBool('isFirstRun', false);
-
-          // ✅ 저장 후 즉시 값을 다시 불러와 확인
-          String? savedToken = prefs.getString('fcmToken');
-          print("🔄 SharedPreferences에 저장된 FCM 토큰 확인: $savedToken");
-        } else {
-          print("❌ 사용자 등록 실패: ${response.body}");
-        }
-      }
-    } else {
-      print("ℹ️ 앱이 이미 실행된 적 있음, 기존 FCM 토큰 확인");
-      String? existingToken = prefs.getString('fcmToken');
-
-      if (existingToken == null) {
-        print("❌ SharedPreferences에 FCM Token 없음! 새로 가져와 저장해야 함.");
-
-        // ✅ FCM 토큰 새로 가져오기
-        String? newFcmToken;
-        try {
-          newFcmToken = await FirebaseMessaging.instance.getToken();
-          print("🔥 새롭게 가져온 FCM Token: $newFcmToken");
-        } catch (e) {
-          print("❌ FCM 토큰 가져오기 실패: $e");
-          return;
-        }
-
-        if (newFcmToken != null) {
-          // ✅ 새로 가져온 토큰을 SharedPreferences에 저장
-          await prefs.setString('fcmToken', newFcmToken);
-          print("✅ SharedPreferences에 새로운 FCM 토큰 저장 완료!");
-        }
-      } else {
-        print("📌 SharedPreferences에 저장된 기존 FCM Token: $existingToken");
-      }
-    }
+    newFcmToken = await FirebaseMessaging.instance.getToken();
+    print("🔥 가져온 FCM Token: $newFcmToken");
   } catch (e) {
-    print("❌ checkFirstRunAndRegisterUser() 실행 중 오류 발생: $e");
+    print("❌ FCM 토큰 가져오기 실패: $e");
+    return;
+  }
+
+  // 🔹 기존 토큰과 다를 경우 서버에 등록
+  if (newFcmToken != null && newFcmToken != existingToken) {
+    print("📡 서버에 FCM 토큰 등록 요청 중...");
+
+    final response = await http.post(
+      Uri.parse("http://192.168.0.5:8080/api/users/register"),
+      body: jsonEncode({"fcmToken": newFcmToken}),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
+      await prefs.setString('fcmToken', newFcmToken);
+    } else {
+      print("❌ 사용자 등록 실패: ${response.body}");
+    }
+  } else {
+    print("ℹ️ 기존 FCM 토큰과 동일하여 서버에 전송하지 않음.");
   }
 }
 
+// 🔹 푸시 알림을 클릭하면 실행할 동작 (유튜브 링크 실행)
+void _handleMessage(RemoteMessage message) {
+  if (message.data.containsKey('youtubeLink')) {
+    String youtubeLink = message.data['youtubeLink'];
+    Uri youtubeUri = Uri.parse(youtubeLink);
+    launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
+  }
+}
+
+// 🔹 로컬 푸시 알림 표시
+Future<void> _showNotification(RemoteMessage message) async {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  final InitializationSettings initializationSettings =
+  InitializationSettings(android: initializationSettingsAndroid);
+
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
+      if (response.payload != null) {
+        Uri youtubeUri = Uri.parse(response.payload!);
+        launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
+      }
+    },
+  );
+
+
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+  AndroidNotificationDetails(
+    'youtube_routine_channel',
+    'YouTube Routine Notifications',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+
+  const NotificationDetails platformChannelSpecifics =
+  NotificationDetails(android: androidPlatformChannelSpecifics);
+
+  await flutterLocalNotificationsPlugin.show(
+    0, // 알림 ID
+    message.notification?.title ?? "유튜브 루틴",
+    message.notification?.body ?? "알림이 도착했습니다.",
+    platformChannelSpecifics,
+    payload: message.data['youtubeLink'],
+  );
+}
 
 
 
