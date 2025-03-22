@@ -14,3 +14,6 @@
 1. run flutter clean 
 2. do the Gradle sync without flutter pub get and make necessary changes to native android code. 
 3. do pub get and run the app.
+
+- D:\Dev\IDE\youtube_routine_front\android\app\src\main\kotlin\com\example\youtube_routine_front 
+- -> Unresolved reference: FlutterActivity : android 프로젝트 open해서 실행
