@@ -64,14 +64,13 @@ void main() async {
 // 🔹 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  _handleMessage(message);
+  // _handleMessage(message);
 }
 
 //  Firebase 초기화 및 푸시 알림 리스너를 설정
 Future<void> setupFirebaseMessaging() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // 🔹 푸시 알림 권한 요청 (iOS)
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     badge: true,
@@ -85,21 +84,15 @@ Future<void> setupFirebaseMessaging() async {
 
   print("✅ 푸시 알림 권한이 허용됨!");
 
-  // ✅ FCM 토큰 가져오기 및 저장
   await _registerFcmToken();
 
-  // ✅ 포그라운드 알림 수신 리스너
+  // ✅ 앱이 포그라운드일 때만 알림 띄우기
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("📌 [푸시 알림 도착 - Foreground]");
     _showNotification(message);
   });
-
-  // ✅ 백그라운드 상태에서 알림 클릭 시 실행
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("📌 [푸시 알림 클릭 - Background]");
-    _handleMessage(message);
-  });
 }
+
 
 // 🔹 FCM 토큰 저장 및 서버에 등록
 Future<void> _registerFcmToken() async {
@@ -138,18 +131,17 @@ Future<void> _registerFcmToken() async {
 }
 
 // 🔹 푸시 알림을 클릭하면 실행할 동작 (유튜브 링크 실행)
-void _handleMessage(RemoteMessage message) {
-  if (message.data.containsKey('youtubeLink')) {
-    String youtubeLink = message.data['youtubeLink'];
-    Uri youtubeUri = Uri.parse(youtubeLink);
-    launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
-  }
-}
+// void _handleMessage(RemoteMessage message) {
+//   if (message.data.containsKey('youtubeLink')) {
+//     String youtubeLink = message.data['youtubeLink'];
+//     Uri youtubeUri = Uri.parse(youtubeLink);
+//     launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
+//   }
+// }
 
 // 🔹 로컬 푸시 알림 표시
 Future<void> _showNotification(RemoteMessage message) async {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
   AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -157,33 +149,64 @@ Future<void> _showNotification(RemoteMessage message) async {
   final InitializationSettings initializationSettings =
   InitializationSettings(android: initializationSettingsAndroid);
 
+  // ✅ 기본 유튜브 링크
+  final fallbackUrl = Uri.parse("https://www.youtube.com/");
+
+  // 🔧 initialize: 알림 클릭 시 안전한 링크 처리
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      if (response.payload != null) {
-        Uri youtubeUri = Uri.parse(response.payload!);
-        launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
+      final rawPayload = response.payload;
+
+      if (rawPayload == null || rawPayload.trim().isEmpty) {
+        print("⚠️ payload 없음 → fallback 이동");
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      Uri? uri;
+      try {
+        uri = Uri.parse(rawPayload);
+      } catch (e) {
+        print("❌ URI 파싱 실패 → fallback 이동");
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      // scheme 확인
+      final scheme = uri.scheme.toLowerCase();
+      if (scheme != 'http' && scheme != 'https') {
+        print("❌ 잘못된 scheme: $scheme → fallback 이동");
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print("⚠️ 실행 불가능한 URL → fallback 이동");
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
       }
     },
   );
 
-
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-  AndroidNotificationDetails(
+  // 🔔 알림 구성 및 표시
+  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'youtube_routine_channel',
     'YouTube Routine Notifications',
     importance: Importance.max,
     priority: Priority.high,
   );
 
-  const NotificationDetails platformChannelSpecifics =
-  NotificationDetails(android: androidPlatformChannelSpecifics);
+  const NotificationDetails notificationDetails = NotificationDetails(
+    android: androidDetails,
+  );
 
   await flutterLocalNotificationsPlugin.show(
-    0, // 알림 ID
+    0,
     message.notification?.title ?? "유튜브 루틴",
     message.notification?.body ?? "알림이 도착했습니다.",
-    platformChannelSpecifics,
+    notificationDetails,
     payload: message.data['youtubeLink'],
   );
 }
