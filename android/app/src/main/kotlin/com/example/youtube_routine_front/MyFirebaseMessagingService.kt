@@ -31,11 +31,19 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun showNotification(title: String, body: String, youtubeLink: String) {
+        val fallbackUrl = "https://www.youtube.com/" // ✅ 기본 링크
+        val finalUrl = try {
+            val uri = Uri.parse(youtubeLink)
+            if (uri.scheme == "http" || uri.scheme == "https") youtubeLink else fallbackUrl
+        } catch (e: Exception) {
+            Log.e("FCM", "❌ 링크 파싱 실패: ${e.message}")
+            fallbackUrl
+        }
+
         val channelId = "youtube_routine_channel"
         val notificationId = System.currentTimeMillis().toInt()
 
-        // 알림 클릭 시 유튜브 링크로 이동하는 인텐트
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(youtubeLink)).apply {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl)).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
@@ -44,7 +52,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Android 8 이상 알림 채널 설정
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
@@ -55,7 +62,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             manager?.createNotificationChannel(channel)
         }
 
-        // 알림 생성
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
@@ -72,10 +78,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         NotificationManagerCompat.from(this).notify(notificationId, notificationBuilder.build())
-
-
-        Log.d("FCM", "✅ 알림 표시 완료, 유튜브 링크: $youtubeLink")
+        Log.d("FCM", "✅ 알림 표시 완료, 유튜브 링크: $finalUrl")
     }
+
 
     override fun onNewToken(token: String) {
         Log.d("FCM", "🔄 새 FCM 토큰 수신: $token")
