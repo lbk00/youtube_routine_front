@@ -130,16 +130,8 @@ Future<void> _registerFcmToken() async {
   }
 }
 
-// 🔹 푸시 알림을 클릭하면 실행할 동작 (유튜브 링크 실행)
-// void _handleMessage(RemoteMessage message) {
-//   if (message.data.containsKey('youtubeLink')) {
-//     String youtubeLink = message.data['youtubeLink'];
-//     Uri youtubeUri = Uri.parse(youtubeLink);
-//     launchUrl(youtubeUri, mode: LaunchMode.externalApplication);
-//   }
-// }
 
-// 🔹 로컬 푸시 알림 표시
+// 로컬 푸시 알림 표시
 Future<void> _showNotification(RemoteMessage message) async {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
