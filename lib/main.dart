@@ -264,9 +264,35 @@ class ThemeNotifier extends ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
 
-  void toggleTheme() {
+  ThemeNotifier() {
+    _loadThemeMode(); // 앱 실행 시 저장된 테마 불러오기
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final theme = prefs.getString('themeMode') ?? 'light';
+
+    _themeMode = _stringToThemeMode(theme);
+    notifyListeners();
+  }
+
+  void toggleTheme() async {
     _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('themeMode', _themeMode.name);
+  }
+
+  ThemeMode _stringToThemeMode(String value) {
+    switch (value) {
+      case 'dark':
+        return ThemeMode.dark;
+      case 'light':
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
+    }
   }
 }
 
