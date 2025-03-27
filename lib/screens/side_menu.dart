@@ -208,15 +208,26 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                   ListTile(
                     leading: Icon(Icons.info, color: Theme.of(context).iconTheme.color),
                     title: Text('앱 정보', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    onTap: () async {
-                      final version = await getAppVersion();
-                      showAboutDialog(
-                        context: context,
-                        applicationName: 'YouTube Routine',
-                        applicationVersion: version,
-                        applicationIcon: Icon(Icons.play_circle, size: 40),
-                      );
-                    },
+                      onTap: () async {
+                        final version = await getAppVersion();
+
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('YouTube Routine'),
+                              content: Text('버전 $version'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text('확인'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+
                   ),
 
                 ],
