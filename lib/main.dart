@@ -297,73 +297,82 @@ class ThemeNotifier extends ChangeNotifier {
 }
 
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
-    builder: (context, themeNotifier, child) {
-    return MaterialApp(
-    title: 'YouTube Routine',
-    themeMode: themeNotifier.themeMode,
-    theme: ThemeData(
-    fontFamily: GoogleFonts.notoSansKr().fontFamily,
-    brightness: Brightness.light,
-    primaryColor: Colors.white,
-    scaffoldBackgroundColor: Colors.grey[100], // ✅ 배경색 밝게 유지
-    cardColor: Colors.white, // ✅ 카드 배경 밝게
-    appBarTheme: AppBarTheme(
-    backgroundColor: Colors.blueGrey, // ✅ AppBar 배경 색
-    iconTheme: IconThemeData(color: Colors.blueGrey), // ✅ 아이콘 색상 조정
-    titleTextStyle: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-    ),
-    textTheme: TextTheme(
-    bodyLarge: TextStyle(color: Colors.black), // ✅ 텍스트 기본 색상
-    bodyMedium: TextStyle(color: Colors.black87),
-    ),
-    colorScheme: ColorScheme.light(
-    primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
-    secondary: Colors.teal, // ✅ 버튼 등의 포인트 컬러
-    onSurface: Colors.black, // ✅ 비활성화된 토글 색상
-    ),
-    dividerColor: Colors.grey[500],
-    ),
-
-    darkTheme: ThemeData(
-    fontFamily: GoogleFonts.notoSansKr().fontFamily,
-    brightness: Brightness.dark,
-    primaryColor: Colors.grey[900], // ✅ 너무 어둡지 않은 짙은 회색
-    scaffoldBackgroundColor: Colors.grey[850], // ✅ 배경을 살짝 밝은 짙은 회색으로 조정
-    cardColor: Colors.grey[800], // ✅ 카드 배경을 약간 밝게 조정
-
-    appBarTheme: AppBarTheme(
-    backgroundColor: Colors.grey[800], // ✅ AppBar도 완전 검은색이 아닌 짙은 회색
-    iconTheme: IconThemeData(color: Colors.white), // ✅ 아이콘 색상 유지
-    titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-    ),
-
-    textTheme: TextTheme(
-    bodyLarge: TextStyle(color: Colors.white70), // ✅ 완전 흰색이 아닌 흰색70% (가독성 증가)
-    bodyMedium: TextStyle(color: Colors.white70), // ✅ 대비가 덜한 흰색60%
-    headlineSmall: TextStyle(color: Colors.white), // ✅ 헤드라인은 밝게 유지
-    ),
-    colorScheme: ColorScheme.dark(
-    primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
-    secondary: Colors.cyan, // ✅ 버튼 색상을 밝은 색으로 변경
-    onSurface: Colors.white60, // ✅ 비활성화된 토글 색상
-    ),
-
-    dividerColor: Colors.grey[700], // ✅ 구분선 색상도 너무 어둡지 않게 조정
-    ),
-
-      home: SplashScreen(),
+      builder: (context, themeNotifier, child) {
+        return MaterialApp(
+          title: 'YouTube Routine',
+          themeMode: themeNotifier.themeMode,
+          theme: ThemeData(
+            fontFamily: GoogleFonts.notoSansKr().fontFamily,
+            brightness: Brightness.light,
+            primaryColor: Colors.white,
+            scaffoldBackgroundColor: Colors.grey[100],
+            // ✅ 배경색 밝게 유지
+            cardColor: Colors.white,
+            // ✅ 카드 배경 밝게
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.blueGrey, // ✅ AppBar 배경 색
+              iconTheme: IconThemeData(color: Colors.blueGrey), // ✅ 아이콘 색상 조정
+              titleTextStyle: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(color: Colors.black), // ✅ 텍스트 기본 색상
+              bodyMedium: TextStyle(color: Colors.black87),
+            ),
+            colorScheme: ColorScheme.light(
+              primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
+              secondary: Colors.teal, // ✅ 버튼 등의 포인트 컬러
+              onSurface: Colors.black, // ✅ 비활성화된 토글 색상
+            ),
+            dividerColor: Colors.grey[500],
+          ),
+          darkTheme: ThemeData(
+            fontFamily: GoogleFonts.notoSansKr().fontFamily,
+            brightness: Brightness.dark,
+            primaryColor: Colors.grey[900],
+            // ✅ 너무 어둡지 않은 짙은 회색
+            scaffoldBackgroundColor: Colors.grey[850],
+            // ✅ 배경을 살짝 밝은 짙은 회색으로 조정
+            cardColor: Colors.grey[800],
+            // ✅ 카드 배경을 약간 밝게 조정
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.grey[800], // ✅ AppBar도 완전 검은색이 아닌 짙은 회색
+              iconTheme: IconThemeData(color: Colors.white), // ✅ 아이콘 색상 유지
+              titleTextStyle: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(color: Colors.white70),
+              // ✅ 완전 흰색이 아닌 흰색70% (가독성 증가)
+              bodyMedium: TextStyle(color: Colors.white70),
+              // ✅ 대비가 덜한 흰색60%
+              headlineSmall: TextStyle(color: Colors.white), // ✅ 헤드라인은 밝게 유지
+            ),
+            colorScheme: ColorScheme.dark(
+              primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
+              secondary: Colors.cyan, // ✅ 버튼 색상을 밝은 색으로 변경
+              onSurface: Colors.white60, // ✅ 비활성화된 토글 색상
+            ),
+            dividerColor: Colors.grey[700], // ✅ 구분선 색상도 너무 어둡지 않게 조정
+          ),
+          home: SplashScreen(),
+        );
+      },
     );
-    },
-    );
-    }
   }
+}
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -386,24 +395,27 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100], // 🔹 배경 색상
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
-            CircularProgressIndicator(),
-            // SizedBox(height: 10),
-            // Text(
-            //   "로딩 중...",
-            //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            // ),
+            // 🔹 로딩 인디케이터
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: CircularProgressIndicator(
+                strokeWidth: 5, // 🔸 원 두께
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey), // 🔸 색상
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
 
 
 
