@@ -23,12 +23,12 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
   TextEditingController contentController = TextEditingController();
   List<String> selectedDays = []; // 선택한 요일 리스트
 
-  // ✅ 오류 메시지 상태
+  // 오류 메시지 상태
   String? youtubeUrlError;
   String? daysError;
 
   // 요일 목록 (영어 이름으로 API에 넘김)
-  // ✅ UI에서는 한글, API에서는 영어로 변환하도록 매핑
+  // UI에서는 한글, API에서는 영어로 변환하도록 매핑
   final Map<String, String> daysMapping = {
     "월": "Monday",
     "화": "Tuesday",
@@ -42,9 +42,9 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
   /// 입력된 값으로 API 요청 보내기
   Future<void> _saveRoutine() async {
     bool isValid = true;
-    // ✅ 입력값 검증 (유튜브 URL & 요일 선택 필수)
+    // 입력값 검증 (유튜브 URL & 요일 선택 필수)
     setState(() {
-      // ✅ 유튜브 URL 검증
+      // 유튜브 URL 검증
       if (youtubeUrlController.text.isEmpty) {
         youtubeUrlError = "URL을 입력하세요.";
         isValid = false;
@@ -52,7 +52,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
         youtubeUrlError = null;
       }
 
-      // ✅ 요일 선택 검증
+      // 요일 선택 검증
       if (selectedDays.isEmpty) {
         daysError = "요일을 선택하세요.";
         isValid = false;
@@ -63,7 +63,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
 
     if (!isValid) return;
 
-    // ✅ 한글 요일을 영어로 변환
+    // 한글 요일을 영어로 변환
     List<String> englishDays = selectedDays.map((day) => daysMapping[day]!)
         .toList();
 
@@ -116,20 +116,20 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        print("✅ 루틴 저장 성공: $responseData");
+        print("루틴 저장 성공: $responseData");
 
-        // ✅ true 값을 반환하여 HomeScreen에서 fetchAlarms() 실행되도록 수정
+        // true 값을 반환하여 HomeScreen에서 fetchAlarms() 실행되도록 수정
         Navigator.pop(context, true);
       } else {
-        // print("❌ 루틴 저장 실패: ${response.body}");
+        // print("루틴 저장 실패: ${response.body}");
 
-        // ✅ 사용자에게 루틴 저장 실패 메시지 팝업
+        // 사용자에게 루틴 저장 실패 메시지 팝업
         _showErrorDialog("루틴은 최대 10개까지 저장할 수 있습니다.");
       }
     } catch (error) {
-      print("❌ 오류 발생: $error");
+      print("오류 발생: $error");
 
-      // ✅ 네트워크 오류 등 예외 발생 시 팝업 표시
+      // 네트워크 오류 등 예외 발생 시 팝업 표시
       _showErrorDialog("오류가 발생했습니다. 네트워크 상태를 확인해주세요.");
     }
   }
@@ -166,13 +166,13 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
           // 시간 선택 영역 (오전/오후, 시, 분)
           Container(
             height: 200,
-            color: Theme.of(context).cardColor, // ✅ 다크 모드 적용
+            color: Theme.of(context).cardColor, // 다크 모드 적용
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
                   child: CupertinoPicker(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 적용
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 다크 모드 적용
                     itemExtent: 40,
                     scrollController: FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1),
                     onSelectedItemChanged: (index) {
@@ -225,22 +225,22 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                 onChanged: (value) {
                   setState(() {
                     if (value.isNotEmpty) {
-                      youtubeUrlError = null; // ✅ 값 입력 시 오류 메시지 초기화
+                      youtubeUrlError = null; // 값 입력 시 오류 메시지 초기화
                     }
                   });
                 },
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  hintText: youtubeUrlError ?? '링크 입력', // ✅ 오류 발생 시 메시지로 변경
+                  hintText: youtubeUrlError ?? '링크 입력', //오류 발생 시 메시지로 변경
                   hintStyle: TextStyle(color: youtubeUrlError != null ? Colors.red : Theme.of(context).hintColor),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey), // ✅ 기본은 blueGrey
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey), // 기본은 blueGrey
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey , width: 2.0), // ✅ 포커스도 blueGrey
+                    borderSide: BorderSide(color: youtubeUrlError != null ? Colors.red : Colors.blueGrey , width: 2.0), // 포커스도 blueGrey
                   ),
                 ),
               ),
@@ -262,16 +262,16 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                   hintText: '내용 입력',
                   hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 기본 테두리 blueGrey
+                    borderSide: BorderSide(color: Colors.blueGrey), // 기본 테두리 blueGrey
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey), // ✅ 비활성화 시 blueGrey
+                    borderSide: BorderSide(color: Colors.blueGrey), // 비활성화 시 blueGrey
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey, width: 2.0), // ✅ 클릭(포커스) 시에도 blueGrey 유지
+                    borderSide: BorderSide(color: Colors.blueGrey, width: 2.0), // 클릭(포커스) 시에도 blueGrey 유지
                   ),
                   errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red), // ✅ 에러 발생 시만 빨간색
+                    borderSide: BorderSide(color: Colors.red), // 에러 발생 시만 빨간색
                   ),
                 ),
               ),
@@ -292,7 +292,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                     Text("요일 선택", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,fontSize: 16 ,fontWeight: FontWeight.bold)),
                     SizedBox(width: 8), // 간격 추가
                     if (daysError != null)
-                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 16)), // ✅ 오류 메시지 빨간색
+                      Text(daysError!, style: TextStyle(color: Colors.red, fontSize: 16)), // 오류 메시지 빨간색
                   ],
                 ),
                 SizedBox(height: 10),
@@ -303,7 +303,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                     return ChoiceChip(
                       label: Text(day, style: TextStyle(color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16)),
                       selected: isSelected,
-                      selectedColor: Colors.blueGrey, // ✅ 선택된 색상 blueGrey
+                      selectedColor: Colors.blueGrey, // 선택된 색상 blueGrey
                       backgroundColor: Theme.of(context).cardColor,
                       showCheckmark: false,
                       padding: EdgeInsets.symmetric(horizontal: 7, vertical: 5),
@@ -315,7 +315,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
                             selectedDays.remove(day);
                           }
                           if (selectedDays.isNotEmpty) {
-                            daysError = null; // ✅ 선택하면 오류 메시지 제거
+                            daysError = null; // 선택하면 오류 메시지 제거
                           }
                         });
                       },
