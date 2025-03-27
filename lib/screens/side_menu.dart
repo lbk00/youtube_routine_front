@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_routine_front/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SideMenu extends StatefulWidget {
   @override
@@ -41,20 +42,20 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
   void _showUsageDialog() {
     showDialog(
       context: context,
-      barrierDismissible: true, // ✅ 팝업 바깥 클릭 시 닫기
+      barrierDismissible: true, // 팝업 바깥 클릭 시 닫기
       builder: (BuildContext context) {
         final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-        final Color stepColor = isDarkMode ? Colors.blueGrey[400]! : Colors.blueGrey!; // ✅ 다크/라이트 모드 색상 변경
+        final Color stepColor = isDarkMode ? Colors.blueGrey[400]! : Colors.blueGrey!; // 다크/라이트 모드 색상 변경
         final Color textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // ✅ 팝업 모서리 둥글게
+            borderRadius: BorderRadius.circular(20), // 팝업 모서리 둥글게
           ),
-          backgroundColor: Theme.of(context).dialogBackgroundColor, // ✅ 다크모드 대응
+          backgroundColor: Theme.of(context).dialogBackgroundColor, // 다크모드 대응
           title: Row(
             children: [
-              Icon(Icons.info_outline, color: stepColor), // ✅ 아이콘 색상 변경
+              Icon(Icons.info_outline, color: stepColor), // 아이콘 색상 변경
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -62,7 +63,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: textColor, // ✅ 다크모드 대응
+                    color: textColor, // 다크모드 대응
                   ),
                 ),
               ),
@@ -87,11 +88,11 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: stepColor, // ✅ 버튼 색상 통일
+                  color: stepColor, // 버튼 색상 통일
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // ✅ 팝업 닫기
+                Navigator.of(context).pop(); // 팝업 닫기
               },
             ),
           ],
@@ -100,14 +101,14 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
     );
   }
 
-  /// ✅ 설명 스타일이 자연스럽게 연결되도록 변경
+  // 설명 스타일이 자연스럽게 연결되도록 변경
   Widget _buildUsageStep(String number, String text, Color numberColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ 숫자를 강조하는 스타일
+          // 숫자를 강조하는 스타일
           Text(
             number,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: numberColor),
@@ -189,7 +190,6 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                       onTap: () {
-                        // print("🌙 다크 모드 변경됨!");
                         themeNotifier.toggleTheme();
                         _closeMenu();
                       }
@@ -201,16 +201,24 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                     onTap: () {
-                      _showUsageDialog(); // ✅ 사이드 메뉴 닫지 않고 팝업만 띄움
+                      _showUsageDialog(); // 사이드 메뉴 닫지 않고 팝업만 띄움
                     },
                   ),
 
                   ListTile(
                     leading: Icon(Icons.info, color: Theme.of(context).iconTheme.color),
                     title: Text('앱 정보', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      // onTap: _closeMenu,
-                      onTap: () => getFCMToken(), // 임시 fcm 토큰 호출
+                    onTap: () async {
+                      final version = await getAppVersion();
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'YouTube Routine',
+                        applicationVersion: version,
+                        applicationIcon: Icon(Icons.play_circle, size: 40),
+                      );
+                    },
                   ),
+
                 ],
               ),
             ),
@@ -220,21 +228,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
     );
   }
 }
-// 임시 함수
-Future<void> getFCMToken() async {
-  // ✅ Firebase에서 새로운 FCM 토큰 가져오기
-  String? token = await FirebaseMessaging.instance.getToken();
-  print("🔥 Firebase에서 가져온 FCM Token: $token");
-
-  // ✅ SharedPreferences에서 저장된 FCM 토큰 가져오기
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? savedToken = prefs.getString('fcmToken');
-
-  // ✅ 저장된 FCM 토큰과 새로 가져온 FCM 토큰 비교
-  if (savedToken == null) {
-    print("❌ SharedPreferences에 저장된 FCM Token 없음");
-  } else {
-    print("📌 SharedPreferences에 저장된 FCM Token: $savedToken");
-  }
-
+Future<String> getAppVersion() async {
+  final info = await PackageInfo.fromPlatform();
+  return 'v${info.version} (${info.buildNumber})';
 }
