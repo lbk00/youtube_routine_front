@@ -52,7 +52,7 @@ void main() async {
     await setupFirebaseMessaging();
   });
 
-  // ✅ FCM 토큰이 변경될 때 업데이트 리스너 설정
+  // FCM 토큰이 변경될 때 업데이트 리스너 설정
   setupFcmTokenRefreshListener();
 
   runApp(ChangeNotifierProvider(
@@ -86,7 +86,7 @@ Future<void> setupFirebaseMessaging() async {
 
   await _registerFcmToken();
 
-  // ✅ 앱이 포그라운드일 때만 알림 띄우기
+  // 앱이 포그라운드일 때만 알림 띄우기
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("📌 [푸시 알림 도착 - Foreground]");
     _showNotification(message);
@@ -94,12 +94,12 @@ Future<void> setupFirebaseMessaging() async {
 }
 
 
-// 🔹 FCM 토큰 저장 및 서버에 등록
+// FCM 토큰 저장 및 서버에 등록
 Future<void> _registerFcmToken() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? existingToken = prefs.getString('fcmToken');
 
-  // ✅ 새로운 FCM 토큰 가져오기
+  // 새로운 FCM 토큰 가져오기
   String? newFcmToken;
   try {
     newFcmToken = await FirebaseMessaging.instance.getToken();
@@ -109,7 +109,7 @@ Future<void> _registerFcmToken() async {
     return;
   }
 
-  // 🔹 기존 토큰과 다를 경우 서버에 등록
+  // 기존 토큰과 다를 경우 서버에 등록
   if (newFcmToken != null && newFcmToken != existingToken) {
     print("📡 서버에 FCM 토큰 등록 요청 중...");
 
@@ -141,7 +141,7 @@ Future<void> _showNotification(RemoteMessage message) async {
   final InitializationSettings initializationSettings =
   InitializationSettings(android: initializationSettingsAndroid);
 
-  // ✅ 기본 유튜브 링크
+  // 기본 유튜브 링크
   final fallbackUrl = Uri.parse("https://www.youtube.com/");
 
   // 🔧 initialize: 알림 클릭 시 안전한 링크 처리
@@ -182,7 +182,7 @@ Future<void> _showNotification(RemoteMessage message) async {
     },
   );
 
-  // 🔔 알림 구성 및 표시
+  // 알림 구성 및 표시
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'youtube_routine_channel',
     'YouTube Routine Notifications',
@@ -205,7 +205,7 @@ Future<void> _showNotification(RemoteMessage message) async {
 
 
 
-// ✅ FCM 토큰이 갱신될 때 자동으로 업데이트
+// FCM 토큰이 갱신될 때 자동으로 업데이트
 void setupFcmTokenRefreshListener() {
   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
     print("🔄 새로운 FCM 토큰 감지: $newToken");
@@ -214,10 +214,10 @@ void setupFcmTokenRefreshListener() {
     String? oldToken = prefs.getString('fcmToken');
 
     if (oldToken != newToken) {
-      // ✅ 기존 SharedPreferences 값 덮어씌우기
+      // 기존 SharedPreferences 값 덮어씌우기
       await prefs.setString('fcmToken', newToken);
 
-      // ✅ 서버에도 갱신된 토큰 업데이트 요청
+      // 서버에도 갱신된 토큰 업데이트 요청
       await updateFcmTokenToServer(newToken);
     } else {
       print("ℹ️ FCM 토큰 변경 없음");
@@ -237,7 +237,7 @@ Future<void> updateFcmTokenToServer(String newToken) async {
     return;
   }
 
-  // ✅ 서버에 기존 토큰과 새로운 토큰 함께 전송
+  // 서버에 기존 토큰과 새로운 토큰 함께 전송
   final response = await http.put(
     Uri.parse("http://192.168.0.5:8080/api/users/update-fcm"),
     body: jsonEncode({
@@ -250,7 +250,7 @@ Future<void> updateFcmTokenToServer(String newToken) async {
   if (response.statusCode == 200) {
     print("✅ 서버에 FCM 토큰 업데이트 성공!");
 
-    // ✅ 서버 업데이트 성공 시 SharedPreferences 값도 변경
+    // 서버 업데이트 성공 시 SharedPreferences 값도 변경
     await prefs.setString('fcmToken', newToken);
   } else {
     print("❌ 서버에 FCM 토큰 업데이트 실패: ${response.body}");
@@ -312,12 +312,12 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
             primaryColor: Colors.white,
             scaffoldBackgroundColor: Colors.grey[100],
-            // ✅ 배경색 밝게 유지
+            // 배경색 밝게 유지
             cardColor: Colors.white,
-            // ✅ 카드 배경 밝게
+            // 카드 배경 밝게
             appBarTheme: AppBarTheme(
-              backgroundColor: Colors.blueGrey, // ✅ AppBar 배경 색
-              iconTheme: IconThemeData(color: Colors.blueGrey), // ✅ 아이콘 색상 조정
+              backgroundColor: Colors.blueGrey, // AppBar 배경 색
+              iconTheme: IconThemeData(color: Colors.blueGrey), // 아이콘 색상 조정
               titleTextStyle: TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -325,13 +325,13 @@ class MyApp extends StatelessWidget {
               ),
             ),
             textTheme: TextTheme(
-              bodyLarge: TextStyle(color: Colors.black), // ✅ 텍스트 기본 색상
+              bodyLarge: TextStyle(color: Colors.black), // 텍스트 기본 색상
               bodyMedium: TextStyle(color: Colors.black87),
             ),
             colorScheme: ColorScheme.light(
-              primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
-              secondary: Colors.teal, // ✅ 버튼 등의 포인트 컬러
-              onSurface: Colors.black, // ✅ 비활성화된 토글 색상
+              primary: Colors.blueGrey, // 활성화된 토글 색상
+              secondary: Colors.teal, // 버튼 등의 포인트 컬러
+              onSurface: Colors.black, // 비활성화된 토글 색상
             ),
             dividerColor: Colors.grey[500],
           ),
@@ -339,14 +339,14 @@ class MyApp extends StatelessWidget {
             fontFamily: GoogleFonts.notoSansKr().fontFamily,
             brightness: Brightness.dark,
             primaryColor: Colors.grey[900],
-            // ✅ 너무 어둡지 않은 짙은 회색
+            // 너무 어둡지 않은 짙은 회색
             scaffoldBackgroundColor: Colors.grey[850],
-            // ✅ 배경을 살짝 밝은 짙은 회색으로 조정
+            // 배경을 살짝 밝은 짙은 회색으로 조정
             cardColor: Colors.grey[800],
-            // ✅ 카드 배경을 약간 밝게 조정
+            // 카드 배경을 약간 밝게 조정
             appBarTheme: AppBarTheme(
-              backgroundColor: Colors.grey[800], // ✅ AppBar도 완전 검은색이 아닌 짙은 회색
-              iconTheme: IconThemeData(color: Colors.white), // ✅ 아이콘 색상 유지
+              backgroundColor: Colors.grey[800], // AppBar도 완전 검은색이 아닌 짙은 회색
+              iconTheme: IconThemeData(color: Colors.white), // 아이콘 색상 유지
               titleTextStyle: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -355,17 +355,17 @@ class MyApp extends StatelessWidget {
             ),
             textTheme: TextTheme(
               bodyLarge: TextStyle(color: Colors.white70),
-              // ✅ 완전 흰색이 아닌 흰색70% (가독성 증가)
+              // 완전 흰색이 아닌 흰색70% (가독성 증가)
               bodyMedium: TextStyle(color: Colors.white70),
-              // ✅ 대비가 덜한 흰색60%
-              headlineSmall: TextStyle(color: Colors.white), // ✅ 헤드라인은 밝게 유지
+              // 대비가 덜한 흰색60%
+              headlineSmall: TextStyle(color: Colors.white), // 헤드라인은 밝게 유지
             ),
             colorScheme: ColorScheme.dark(
-              primary: Colors.blueGrey, // ✅ 활성화된 토글 색상
-              secondary: Colors.cyan, // ✅ 버튼 색상을 밝은 색으로 변경
-              onSurface: Colors.white60, // ✅ 비활성화된 토글 색상
+              primary: Colors.blueGrey, // 활성화된 토글 색상
+              secondary: Colors.cyan, // 버튼 색상을 밝은 색으로 변경
+              onSurface: Colors.white60, // 비활성화된 토글 색상
             ),
-            dividerColor: Colors.grey[700], // ✅ 구분선 색상도 너무 어둡지 않게 조정
+            dividerColor: Colors.grey[700], // 구분선 색상도 너무 어둡지 않게 조정
           ),
           home: SplashScreen(),
         );
@@ -405,8 +405,8 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 100,
               height: 100,
               child: CircularProgressIndicator(
-                strokeWidth: 5, // 🔸 원 두께
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey), // 🔸 색상
+                strokeWidth: 5, // 원 두께
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey), // 색상
               ),
             ),
           ],
