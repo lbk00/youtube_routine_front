@@ -1,4 +1,4 @@
 flutter_native_splash:
-  color: "#ffffff"         # 배경색
-  image: assets/icon2.png  # 로고 이미지
+  color: "#f5f5f5"  # Colors.grey[100] 에 해당하는 배경색
+  image: assets/icon1.png  # 로고 이미지
   android: true
