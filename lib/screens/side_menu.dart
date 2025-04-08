@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:youtube_routine_front/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SideMenu extends StatefulWidget {
   @override
@@ -120,7 +121,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
-                color: Theme.of(context).textTheme.bodyLarge?.color, // ✅ 다크모드 대응
+                color: Theme.of(context).textTheme.bodyLarge?.color, // 다크모드 대응
               ),
             ),
           ),
@@ -207,29 +208,57 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
 
                   ListTile(
                     leading: Icon(Icons.info, color: Theme.of(context).iconTheme.color),
-                    title: Text('앱 정보', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      onTap: () async {
-                        final version = await getAppVersion();
+                    title: Text(
+                      '앱 정보',
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                    ),
+                    onTap: () async {
+                      final version = await getAppVersion();
 
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text('YouTube Routine'),
-                              content: Text('버전 $version'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text('확인'),
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('YouTube Routine'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('버전 $version'),
+                                SizedBox(height: 16),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final url = Uri.parse('https://www.youtube.com'); // 임시 링크
+                                    final canLaunch = await canLaunchUrl(url);
+                                    if (canLaunch) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text("링크를 열 수 없습니다")),
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                    '개인정보 처리방침 보기',
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
                                 ),
                               ],
-                            );
-                          },
-                        );
-                      }
-
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('확인'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                   ),
-
                 ],
               ),
             ),
