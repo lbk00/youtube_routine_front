@@ -20,14 +20,14 @@ void main() async {
   // .env 파일 로드
   await dotenv.load(fileName: "assets/.env");
 
-  // 기기를 세로 모드로 고정
+  // 기기 방향 고정
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
+  // Firebase 초기화
   if (kIsWeb) {
-    // Web에서는 FirebaseOptions을 사용하여 초기화
     await Firebase.initializeApp(
       options: FirebaseOptions(
         apiKey: dotenv.env['API_KEY']!,
@@ -43,23 +43,64 @@ void main() async {
     await Firebase.initializeApp();
   }
 
-  // 푸시 알림 설정
+  // 백그라운드 푸시 알림 설정
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // FCM 초기화 및 토큰 등록
-  // 비동기 실행하여 UI 스레드 차단 방지
-  Future.microtask(() async {
-    await setupFirebaseMessaging();
-  });
+  // FCM 초기화 및 토큰 등록 (비동기로 두지 말고 반드시 await 처리)
+  await setupFirebaseMessaging();
 
-  // FCM 토큰이 변경될 때 업데이트 리스너 설정
+  // FCM 토큰 변경 리스너 등록
   setupFcmTokenRefreshListener();
 
-  runApp(ChangeNotifierProvider(
-    create: (context) => ThemeNotifier(),
-    child: const MyApp(),
-  ));
+  // 앱 실행
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
+
+
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // main()에서 이미 모든 초기화 끝났기 때문에 단순 UX용 딜레이
+    Future.delayed(Duration(seconds: 2), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Center(
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: CircularProgressIndicator(
+            strokeWidth: 5,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 // 🔹 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -373,50 +414,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // 2초 후에 HomeScreen으로 이동
-    Future.delayed(Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100], // 🔹 배경 색상
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 🔹 로딩 인디케이터
-            SizedBox(
-              width: 100,
-              height: 100,
-              child: CircularProgressIndicator(
-                strokeWidth: 5, // 원 두께
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey), // 색상
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
 
 
 
