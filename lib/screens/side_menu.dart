@@ -228,7 +228,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                                 SizedBox(height: 16),
                                 GestureDetector(
                                   onTap: () async {
-                                    final url = Uri.parse('https://www.youtube.com'); // 임시 링크
+                                    final url = Uri.parse('https://curvy-alley-58f.notion.site/1d003ca1cea18098926bf338f91de368'); // 개인정보 처리방침 페이지
                                     final canLaunch = await canLaunchUrl(url);
                                     if (canLaunch) {
                                       await launchUrl(url, mode: LaunchMode.externalApplication);
