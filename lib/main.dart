@@ -237,8 +237,8 @@ Future<void> _showNotification(RemoteMessage message) async {
 
   await flutterLocalNotificationsPlugin.show(
     0,
-    message.notification?.title ?? "유튜브 루틴",
-    message.notification?.body ?? "알림이 도착했습니다.",
+    message.notification?.title ?? "오늘의 홈트",
+    message.notification?.body ?? "지금 할 루틴이 도착했어요!",
     notificationDetails,
     payload: message.data['youtubeLink'],
   );
