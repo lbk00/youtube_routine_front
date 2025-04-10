@@ -346,6 +346,7 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false, // 디버그 표시 삭제 ( 스샷용 )
           title: 'YouTube Routine',
           themeMode: themeNotifier.themeMode,
           theme: ThemeData(
