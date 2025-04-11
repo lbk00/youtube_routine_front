@@ -75,11 +75,10 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildUsageStep("➊", "화면 상단의 '+' 버튼을 눌러 새로운 루틴을 추가하세요.", stepColor),
-              _buildUsageStep("➋", "원하는 요일과 시간을 설정하고 유튜브 링크를 입력하세요.", stepColor),
+              _buildUsageStep("➋", "원하는 요일과 시간을 설정하고, 같이 운동하고 싶은 유튜브 링크를 입력하세요", stepColor),
               _buildUsageStep("➌", "설정한 시간에 알림이 오면 클릭하여 저장된 유튜브 링크로 이동합니다.", stepColor),
               _buildUsageStep("➍", "토글 버튼을 통해 루틴을 ON/OFF 할 수 있습니다.", stepColor),
               _buildUsageStep("➎", "루틴은 최대 10개까지 저장 가능합니다.", stepColor),
-              _buildUsageStep("➏", "오전 12시는 자정, 오후 12시는 정오를 의미합니다.", stepColor),
             ],
           ),
           actions: [
