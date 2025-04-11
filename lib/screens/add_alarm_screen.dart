@@ -18,7 +18,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
   int selectedHour = 8;
   int selectedMinute = 0;
   String selectedPeriod = '오후';
-  bool isRepeatEnabled = false;
+  bool isRepeatEnabled = true;
   TextEditingController youtubeUrlController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   List<String> selectedDays = []; // 선택한 요일 리스트
