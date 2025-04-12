@@ -102,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 
-// 🔹 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
+// 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   // _handleMessage(message);
@@ -127,12 +127,6 @@ Future<void> setupFirebaseMessaging() async {
 
   await _registerFcmToken();
 
-  // 앱이 포그라운드일 때만 알림 띄우기
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("📌 [푸시 알림 도착 - Foreground]");
-    // 주석처리? ( 메인화면 켜있을때 알림 2개 오는 문제 )
-    _showNotification(message);
-  });
 }
 
 
@@ -170,79 +164,6 @@ Future<void> _registerFcmToken() async {
   } else {
     print("ℹ️ 기존 FCM 토큰과 동일하여 서버에 전송하지 않음.");
   }
-}
-
-
-// 로컬 푸시 알림 표시
-Future<void> _showNotification(RemoteMessage message) async {
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  final InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
-
-  // 기본 유튜브 링크
-  final fallbackUrl = Uri.parse("https://www.youtube.com/");
-
-  // 🔧 initialize: 알림 클릭 시 안전한 링크 처리
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      final rawPayload = response.payload;
-
-      if (rawPayload == null || rawPayload.trim().isEmpty) {
-        print("⚠️ payload 없음 → fallback 이동");
-        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-
-      Uri? uri;
-      try {
-        uri = Uri.parse(rawPayload);
-      } catch (e) {
-        print("❌ URI 파싱 실패 → fallback 이동");
-        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-
-      // scheme 확인
-      final scheme = uri.scheme.toLowerCase();
-      if (scheme != 'http' && scheme != 'https') {
-        print("❌ 잘못된 scheme: $scheme → fallback 이동");
-        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        print("⚠️ 실행 불가능한 URL → fallback 이동");
-        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
-      }
-    },
-  );
-
-  // 알림 구성 및 표시
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'youtube_routine_channel',
-    'YouTube Routine Notifications',
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-
-  const NotificationDetails notificationDetails = NotificationDetails(
-    android: androidDetails,
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    message.notification?.title ?? "오늘의 홈트",
-    message.notification?.body ?? "오늘 할 루틴이 도착했어요!",
-    notificationDetails,
-    payload: message.data['youtubeLink'],
-  );
 }
 
 
