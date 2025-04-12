@@ -130,6 +130,7 @@ Future<void> setupFirebaseMessaging() async {
   // 앱이 포그라운드일 때만 알림 띄우기
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("📌 [푸시 알림 도착 - Foreground]");
+    // 주석처리? ( 메인화면 켜있을때 알림 2개 오는 문제 )
     _showNotification(message);
   });
 }
