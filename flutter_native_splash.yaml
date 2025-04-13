@@ -1,5 +1,10 @@
 flutter_native_splash:
   color: "#E6EEF3"
-  image: assets/loading.png  # 로고 이미지
+  image: assets/loading.png
   android: true
   android_gravity: center
+
+  android_12:
+    color: "#E6EEF3"
+    image: assets/loading_safe.png
+    icon_background_color: "#E6EEF3"

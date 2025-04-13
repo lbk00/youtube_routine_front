@@ -50,7 +50,7 @@ dependencies:
 
 flutter_launcher_icons:
   android: true
-  image_path: assets/icon2.png
+  image_path: assets/icon3.png
   min_sdk_android: 23
 
 dev_dependencies:
@@ -79,7 +79,9 @@ flutter:
   assets:
     - assets/.env
     - assets/loading.png
+    - assets/loading_safe.png
     - assets/icon2.png
+    - assets/icon3.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
