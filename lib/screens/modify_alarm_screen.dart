@@ -36,12 +36,12 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
   void initState() {
     super.initState();
 
-    // print("📌 [ModifyAlarmScreen] 받은 routineTime: ${widget.routine['routineTime']}");
+    // // print("📌 [ModifyAlarmScreen] 받은 routineTime: ${widget.routine['routineTime']}");
 
     // ✅ "routineTime"을 직접 사용하여 변환 (원본 값 사용)
     _initializeTime(widget.routine['routineTime'] ?? '00:00');
 
-    // print("✅ 변환된 시간 - Hour: $selectedHour, Minute: $selectedMinute, Period: $selectedPeriod");
+    // // print("✅ 변환된 시간 - Hour: $selectedHour, Minute: $selectedMinute, Period: $selectedPeriod");
 
     periodController = FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1);
     hourController = FixedExtentScrollController(initialItem: selectedHour - 1);
@@ -131,7 +131,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       );
 
       if (response.statusCode == 200) {
-        print("✅ 루틴 수정 성공");
+        // print("✅ 루틴 수정 성공");
 
         // ✅ 수정된 데이터를 `widget.routine`에 반영
         setState(() {
@@ -147,10 +147,10 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
         Navigator.pop(context, true); // ✅ true 반환하여 홈 화면에서 fetchAlarms() 실행
       } else {
-        print("❌ 루틴 수정 실패: ${response.body}");
+        // print("❌ 루틴 수정 실패: ${response.body}");
       }
     } catch (error) {
-      print("❌ 오류 발생: $error");
+      // print("❌ 오류 발생: $error");
     }
   }
 
@@ -189,13 +189,13 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       final response = await http.delete(url);
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print("✅ 루틴 삭제 성공");
+        // print("✅ 루틴 삭제 성공");
         Navigator.pop(context, true); // ✅ 삭제 성공 후 true 반환하여 홈 화면에서 fetchAlarms() 실행
       } else {
-        print("❌ 루틴 삭제 실패: ${response.body}");
+        // print("❌ 루틴 삭제 실패: ${response.body}");
       }
     } catch (error) {
-      print("❌ 오류 발생: $error");
+      // print("❌ 오류 발생: $error");
     }
   }
 

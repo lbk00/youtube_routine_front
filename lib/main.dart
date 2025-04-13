@@ -63,45 +63,6 @@ void main() async {
 
 
 
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-
-    // main()에서 이미 모든 초기화 끝났기 때문에 단순 UX용 딜레이
-    Future.delayed(Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: Center(
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: CircularProgressIndicator(
-            strokeWidth: 5,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
 // 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -119,11 +80,11 @@ Future<void> setupFirebaseMessaging() async {
   );
 
   if (settings.authorizationStatus == AuthorizationStatus.denied) {
-    print("🔴 푸시 알림 권한이 거부됨!");
+    // // print("🔴 푸시 알림 권한이 거부됨!");
     return;
   }
 
-  print("✅ 푸시 알림 권한이 허용됨!");
+  // // print("✅ 푸시 알림 권한이 허용됨!");
 
   await _registerFcmToken();
 
@@ -139,15 +100,15 @@ Future<void> _registerFcmToken() async {
   String? newFcmToken;
   try {
     newFcmToken = await FirebaseMessaging.instance.getToken();
-    print("🔥 가져온 FCM Token: $newFcmToken");
+    // print("🔥 가져온 FCM Token: $newFcmToken");
   } catch (e) {
-    print("❌ FCM 토큰 가져오기 실패: $e");
+    // print("❌ FCM 토큰 가져오기 실패: $e");
     return;
   }
 
   // 기존 토큰과 다를 경우 서버에 등록
   if (newFcmToken != null && newFcmToken != existingToken) {
-    print("📡 서버에 FCM 토큰 등록 요청 중...");
+    // print("📡 서버에 FCM 토큰 등록 요청 중...");
 
     final response = await http.post(
       Uri.parse("http://192.168.0.5:8080/api/users/register"),
@@ -156,13 +117,13 @@ Future<void> _registerFcmToken() async {
     );
 
     if (response.statusCode == 200) {
-      print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
+      // print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
       await prefs.setString('fcmToken', newFcmToken);
     } else {
-      print("❌ 사용자 등록 실패: ${response.body}");
+      // print("❌ 사용자 등록 실패: ${response.body}");
     }
   } else {
-    print("ℹ️ 기존 FCM 토큰과 동일하여 서버에 전송하지 않음.");
+    // print("ℹ️ 기존 FCM 토큰과 동일하여 서버에 전송하지 않음.");
   }
 }
 
@@ -171,7 +132,7 @@ Future<void> _registerFcmToken() async {
 // FCM 토큰이 갱신될 때 자동으로 업데이트
 void setupFcmTokenRefreshListener() {
   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-    print("🔄 새로운 FCM 토큰 감지: $newToken");
+    // print("🔄 새로운 FCM 토큰 감지: $newToken");
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? oldToken = prefs.getString('fcmToken');
@@ -183,7 +144,7 @@ void setupFcmTokenRefreshListener() {
       // 서버에도 갱신된 토큰 업데이트 요청
       await updateFcmTokenToServer(newToken);
     } else {
-      print("ℹ️ FCM 토큰 변경 없음");
+      // print("ℹ️ FCM 토큰 변경 없음");
     }
   });
 }
@@ -195,7 +156,7 @@ Future<void> updateFcmTokenToServer(String newToken) async {
   String? oldToken = prefs.getString('fcmToken'); // 기존 토큰 가져오기
 
   if (oldToken == null) {
-    print("❌ 기존 FCM 토큰이 없음! 새 토큰만 저장.");
+    // print("❌ 기존 FCM 토큰이 없음! 새 토큰만 저장.");
     await prefs.setString('fcmToken', newToken);
     return;
   }
@@ -211,12 +172,12 @@ Future<void> updateFcmTokenToServer(String newToken) async {
   );
 
   if (response.statusCode == 200) {
-    print("✅ 서버에 FCM 토큰 업데이트 성공!");
+    // print("✅ 서버에 FCM 토큰 업데이트 성공!");
 
     // 서버 업데이트 성공 시 SharedPreferences 값도 변경
     await prefs.setString('fcmToken', newToken);
   } else {
-    print("❌ 서버에 FCM 토큰 업데이트 실패: ${response.body}");
+    // print("❌ 서버에 FCM 토큰 업데이트 실패: ${response.body}");
   }
 }
 
@@ -331,7 +292,7 @@ class MyApp extends StatelessWidget {
             ),
             dividerColor: Colors.grey[700], // 구분선 색상도 너무 어둡지 않게 조정
           ),
-          home: SplashScreen(),
+          home: HomeScreen(),
         );
       },
     );

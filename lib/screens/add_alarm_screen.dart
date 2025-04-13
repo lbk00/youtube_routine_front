@@ -116,7 +116,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        print("루틴 저장 성공: $responseData");
+        // print("루틴 저장 성공: $responseData");
 
         // true 값을 반환하여 HomeScreen에서 fetchAlarms() 실행되도록 수정
         Navigator.pop(context, true);
@@ -127,7 +127,7 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
         _showErrorDialog("루틴은 최대 10개까지 저장할 수 있습니다.");
       }
     } catch (error) {
-      print("오류 발생: $error");
+      // print("오류 발생: $error");
 
       // 네트워크 오류 등 예외 발생 시 팝업 표시
       _showErrorDialog("오류가 발생했습니다. 네트워크 상태를 확인해주세요.");

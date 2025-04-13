@@ -12,13 +12,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> alarms = []; // ✅ API에서 가져온 루틴 데이터 저장
-  List<bool> alarmStates = []; // ✅ ON/OFF 상태 저장
+  List<Map<String, dynamic>> alarms = []; // API에서 가져온 루틴 데이터 저장
+  List<bool> alarmStates = []; // ON/OFF 상태 저장
 
   @override
   void initState() {
     super.initState();
-    fetchAlarms(); // ✅ 앱 실행 시 API 호출
+    fetchAlarms(); // 앱 실행 시 API 호출
   }
 
   String formatTime(String routineTime) {
@@ -38,13 +38,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-  /// ✅ 모든 루틴 조회
+  //모든 루틴 조회
   Future<void> fetchAlarms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? fcmToken = prefs.getString('fcmToken');
 
     if (fcmToken == null) {
-      print("❌ 저장된 FCM 토큰이 없음!");
+      // print("❌ 저장된 FCM 토큰이 없음!");
       return;
     }
     // fcm 토큰으로 조회
@@ -56,13 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         alarms = data.map((item) {
-          String rawTime = item['routineTime']; // ✅ 원본 시간값 저장
-          print("📌 API에서 받은 routineTime: $rawTime"); // 디버깅용 로그
+          String rawTime = item['routineTime']; // 원본 시간값 저장
+          // print("📌 API에서 받은 routineTime: $rawTime"); // 디버깅용 로그
 
           return {
             'id': item['id'],
-            'time': formatTime(rawTime), // ✅ 변환된 시간 (오전/오후 적용)
-            'routineTime': rawTime, // ✅ 원본 시간값 추가
+            'time': formatTime(rawTime), // 변환된 시간 (오전/오후 적용)
+            'routineTime': rawTime, // 원본 시간값 추가
             'description': item['content'] ?? '',
             'days': item['days'] as List<dynamic> ?? [],
             'isActive': item['active'] ?? false,
@@ -89,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (response.statusCode == 200) {
-        // print("✅ 루틴 활성 상태 변경 성공 (ID: $routineId)");
+        // // print("✅ 루틴 활성 상태 변경 성공 (ID: $routineId)");
 
         setState(() {
-          // ✅ alarms 리스트에서 해당 루틴의 isActive 상태를 반전
+          //  alarms 리스트에서 해당 루틴의 isActive 상태를 반전
           for (var alarm in alarms) {
             if (alarm['id'] == routineId) {
               alarm['isActive'] = !alarm['isActive'];
@@ -101,10 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
       } else {
-        print("❌ 루틴 활성 상태 변경 실패: ${response.body}");
+        // print("❌ 루틴 활성 상태 변경 실패: ${response.body}");
       }
     } catch (error) {
-      print("❌ 오류 발생: $error");
+      // print("❌ 오류 발생: $error");
     }
   }
 
@@ -123,11 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
               String? fcmToken = prefs.getString('fcmToken'); // 저장된 FCM 토큰 가져오기
 
               if (fcmToken == null) {
-                print("❌ FCM 토큰이 존재하지 않음!");
+                // print("❌ FCM 토큰이 존재하지 않음!");
                 return;
               }
 
-              print("✅ AddAlarmScreen에 전달할 FCM Token: $fcmToken");
+              // print("✅ AddAlarmScreen에 전달할 FCM Token: $fcmToken");
 
               final result = await showModalBottomSheet(
                 context: context,
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
 
               if (result == true) {
-                fetchAlarms(); // ✅ 루틴 저장 후 자동 갱신
+                fetchAlarms(); // 루틴 저장 후 자동 갱신
               }
             },
           ),
@@ -187,8 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: () {
                     final routine = {
                       'id': alarm['id'],
-                      'time': alarm['time'] ?? '00:00', // ✅ 변환된 시간 (오전/오후 적용)
-                      'routineTime': alarm['routineTime'] ?? '00:00', // ✅ 원본 24시간제 시간
+                      'time': alarm['time'] ?? '00:00', // 변환된 시간 (오전/오후 적용)
+                      'routineTime': alarm['routineTime'] ?? '00:00', // 원본 24시간제 시간
                       'description': alarm['description'] ?? '',
                       'days': alarm['days'] ?? [],
                       'isActive': alarm['isActive'] ?? false,
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       'repeatFlag': alarm['repeatFlag'] ?? false,
                     };
 
-                    // print("📌 [HomeScreen] ModifyAlarmScreen에 넘기는 routineTime: ${routine['routineTime']}");
+                    //  print("📌 [HomeScreen] ModifyAlarmScreen에 넘기는 routineTime: ${routine['routineTime']}");
 
                     showModalBottomSheet(
                       context: context,
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context) => ModifyAlarmScreen(routine: routine),
                     ).then((result) {
                       if (result == true) {
-                        fetchAlarms(); // ✅ 루틴 수정 , 삭제 후 자동 갱신
+                        fetchAlarms(); // 루틴 수정 , 삭제 후 자동 갱신
                       }
                     });
                   },
@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     description: alarm['description'],
                     days: alarm['days'].cast<String>(),
                     isActive: alarm['isActive'],
-                    onToggle: (bool newValue) { // ✅ bool 값을 받아서 toggleRoutine 호출
+                    onToggle: (bool newValue) { // bool 값을 받아서 toggleRoutine 호출
                       toggleRoutine(alarm['id']);
                     },
                   ),
@@ -274,7 +274,7 @@ class AlarmTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded( // ✅ Row 내부에서 공간 조정 (overflow 방지)
+                Expanded( // Row 내부에서 공간 조정 (overflow 방지)
                   child: Row(
                     children: [
                       Text(
@@ -286,8 +286,8 @@ class AlarmTile extends StatelessWidget {
                         child: Text(
                           description,
                           style: TextStyle(fontSize: 22),
-                          overflow: TextOverflow.ellipsis, // ✅ 길 경우 ...으로 표시
-                          maxLines: 1, // ✅ 한 줄까지만 표시
+                          overflow: TextOverflow.ellipsis, // 길 경우 ...으로 표시
+                          maxLines: 1, //  한 줄까지만 표시
                         ),
                       ),
                     ],
@@ -321,9 +321,9 @@ class AlarmTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" // ✅ 고정된 순서
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" //  고정된 순서
               ]
-                  .where((day) => days.contains(day)) // ✅ 선택된 요일만 필터링
+                  .where((day) => days.contains(day)) // 선택된 요일만 필터링
                   .map((day) {
                 String koreanDay = dayTranslations[day] ?? day; //  영어 → 한글 변환
                 return Container(
@@ -331,8 +331,8 @@ class AlarmTile extends StatelessWidget {
                   margin: EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[400]  // ✅ 다크 모드에서는 밝은 회색 배경
-                        : Colors.grey[300],  // ✅ 라이트 모드에서는 기존 회색
+                        ? Colors.grey[400]  // 다크 모드에서는 밝은 회색 배경
+                        : Colors.grey[300],  // 라이트 모드에서는 기존 회색
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -342,8 +342,8 @@ class AlarmTile extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.black87  // ✅ 다크 모드에서는 검은색 텍스트
-                            : Colors.black,    // ✅ 기본 모드에서도 가독성 유지
+                            ? Colors.black87  // 다크 모드에서는 검은색 텍스트
+                            : Colors.black,    // 기본 모드에서도 가독성 유지
                       ),
                     ),
                   ),
