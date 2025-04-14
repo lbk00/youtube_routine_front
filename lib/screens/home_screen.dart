@@ -6,6 +6,10 @@ import 'package:youtube_routine_front/screens/side_menu.dart';
 import 'package:youtube_routine_front/screens/modify_alarm_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final baseUrl = dotenv.env['API_URL'];
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -48,7 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     // fcm 토큰으로 조회
-    final response = await http.get(Uri.parse('http://192.168.0.5:8080/api/routines/user/$fcmToken'));
+    final response = await http.get(
+      Uri.parse('${dotenv.env['API_URL']}/api/routines/user/$fcmToken'),
+    );
+
 
     if (response.statusCode == 200) {
       final decodedData = utf8.decode(response.bodyBytes);
@@ -80,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //  토글 버튼
   Future<void> toggleRoutine(int routineId) async {
-    final url = Uri.parse("http://192.168.0.5:8080/api/routines/toggle/$routineId");
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/routines/toggle/$routineId');
 
     try {
       final response = await http.put(

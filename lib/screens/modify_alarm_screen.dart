@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final baseUrl = dotenv.env['API_URL'];
+
 class ModifyAlarmScreen extends StatefulWidget {
   final Map<String, dynamic> routine;
 
@@ -101,7 +105,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
   // 루틴 수정
   Future<void> _updateRoutine(int routineId) async {
-    final url = Uri.parse("http://192.168.0.5:8080/api/routines/$routineId");
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/routines/$routineId');
 
     List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
 
@@ -183,7 +187,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
   // 루틴 삭제
   Future<void> _deleteRoutine(int routineId) async {
-    final url = Uri.parse("http://192.168.0.5:8080/api/routines/$routineId"); // ✅ 루틴 ID 기반 삭제 요청
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/routines/$routineId'); // ✅ 루틴 ID 기반 삭제 요청
 
     try {
       final response = await http.delete(url);

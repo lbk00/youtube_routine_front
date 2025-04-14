@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final baseUrl = dotenv.env['API_URL'];
+
 class AddAlarmScreen extends StatefulWidget {
   final String fcmToken; // 각 사용자의 FCM 토큰
 
@@ -77,8 +82,8 @@ class _AddAlarmScreenState extends State<AddAlarmScreen> {
     String routineTime = "${hour.toString().padLeft(2, '0')}:${selectedMinute
         .toString().padLeft(2, '0')}";
 
-    final url = Uri.parse(
-        "http://192.168.0.5:8080/api/routines/create/${widget.fcmToken}");
+    final url = Uri.parse('${dotenv.env['API_URL']}/api/routines/create/${widget.fcmToken}');
+
     final Map<String, dynamic> requestBody = {
       "days": englishDays,
       "routineTime": routineTime,
