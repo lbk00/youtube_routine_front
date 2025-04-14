@@ -10,55 +10,58 @@ import 'package:http/http.dart' as http;  // HTTP 요청 라이브러리 추가
 import 'dart:convert';  // jsonEncode 사용을 위한 패키지 추가
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // .env 파일 로드
-  await dotenv.load(fileName: "assets/.env");
+  try {
+    // .env 파일 로드
+    await dotenv.load(fileName: "assets/.env");
 
-  // 기기 방향 고정
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+    // 기기 방향 고정
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
-  // Firebase 초기화
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: FirebaseOptions(
-        apiKey: dotenv.env['API_KEY']!,
-        authDomain: dotenv.env['AUTH_DOMAIN']!,
-        projectId: dotenv.env['PROJECT_ID']!,
-        storageBucket: dotenv.env['STORAGE_BUCKET']!,
-        messagingSenderId: dotenv.env['MESSAGING_SENDER_ID']!,
-        appId: dotenv.env['APP_ID']!,
-        measurementId: dotenv.env['MEASUREMENT_ID'],
+    // Firebase 초기화
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+          apiKey: dotenv.env['API_KEY']!,
+          authDomain: dotenv.env['AUTH_DOMAIN']!,
+          projectId: dotenv.env['PROJECT_ID']!,
+          storageBucket: dotenv.env['STORAGE_BUCKET']!,
+          messagingSenderId: dotenv.env['MESSAGING_SENDER_ID']!,
+          appId: dotenv.env['APP_ID']!,
+          measurementId: dotenv.env['MEASUREMENT_ID'],
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+
+    // 백그라운드 푸시 알림 설정
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // FCM 초기화 및 토큰 등록 (비동기로 두지 말고 반드시 await 처리)
+    await setupFirebaseMessaging();
+
+    // FCM 토큰 변경 리스너 등록
+    setupFcmTokenRefreshListener();
+
+    // 앱 실행
+    runApp(
+      ChangeNotifierProvider(
+        create: (context) => ThemeNotifier(),
+        child: const MyApp(),
       ),
     );
-  } else {
-    await Firebase.initializeApp();
+  } catch (e) {
+    // print("❌ main() 초기화 중 오류 발생: $e");
   }
-
-  // 백그라운드 푸시 알림 설정
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // FCM 초기화 및 토큰 등록 (비동기로 두지 말고 반드시 await 처리)
-  await setupFirebaseMessaging();
-
-  // FCM 토큰 변경 리스너 등록
-  setupFcmTokenRefreshListener();
-
-  // 앱 실행
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeNotifier(),
-      child: const MyApp(),
-    ),
-  );
 }
 
 
@@ -111,7 +114,7 @@ Future<void> _registerFcmToken() async {
     // print("📡 서버에 FCM 토큰 등록 요청 중...");
 
     final response = await http.post(
-      Uri.parse("http://192.168.0.5:8080/api/users/register"),
+      Uri.parse('${dotenv.env['API_URL']}/api/users/register'),
       body: jsonEncode({"fcmToken": newFcmToken}),
       headers: {"Content-Type": "application/json"},
     );
@@ -163,13 +166,14 @@ Future<void> updateFcmTokenToServer(String newToken) async {
 
   // 서버에 기존 토큰과 새로운 토큰 함께 전송
   final response = await http.put(
-    Uri.parse("http://192.168.0.5:8080/api/users/update-fcm"),
+    Uri.parse('${dotenv.env['API_URL']}/api/users/update-fcm'),
     body: jsonEncode({
-      "oldFcmToken": oldToken,  // 기존 FCM 토큰
-      "newFcmToken": newToken   // 새로운 FCM 토큰
+      "oldFcmToken": oldToken,
+      "newFcmToken": newToken,
     }),
     headers: {"Content-Type": "application/json"},
   );
+
 
   if (response.statusCode == 200) {
     // print("✅ 서버에 FCM 토큰 업데이트 성공!");
