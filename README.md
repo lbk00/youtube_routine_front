@@ -15,6 +15,12 @@
 2. do the Gradle sync without flutter pub get and make necessary changes to native android code. 
 3. do pub get and run the app.
 
+> 앱번들 빌드 오류
+1. build 폴더 삭제
+2. gradle.properties에 kotlin.incremental=false 추가
+3. flutter clean
+4. flutter pub get
+5. flutter build appbundle
 
 
 - D:\Dev\IDE\youtube_routine_front\android\app\src\main\kotlin\com\example\youtube_routine_front 
