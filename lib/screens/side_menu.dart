@@ -79,6 +79,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
               _buildUsageStep("➌", "설정한 시간에 알림이 오면 클릭하여 저장된 유튜브 링크로 이동합니다.", stepColor),
               _buildUsageStep("➍", "토글 버튼을 통해 루틴을 ON/OFF 할 수 있습니다.", stepColor),
               _buildUsageStep("➎", "루틴은 최대 10개까지 저장 가능합니다.", stepColor),
+              _buildUsageStep("🔔", "알림을 받으시려면, 설정에서 알림 권한을 켜주세요.", stepColor),
             ],
           ),
           actions: [
