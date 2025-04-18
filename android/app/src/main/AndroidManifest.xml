@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.youtube_routine_front">
+    package="com.lbk6661.youtube_routine_front">
     <!-- ✅ 인터넷 및 FCM 관련 권한 추가 -->
     <uses-permission
         android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -15,7 +15,7 @@
         android:label="오늘의 홈트"
         android:icon="@mipmap/ic_launcher">
         <service
-            android:name=".MyFirebaseMessagingService"
+            android:name="com.lbk6661.youtube_routine_front.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action
@@ -23,7 +23,7 @@
             </intent-filter>
         </service>
         <activity
-            android:name="com.example.youtube_routine_front.MainActivity"
+            android:name="com.lbk6661.youtube_routine_front.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity=""

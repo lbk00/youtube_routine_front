@@ -3,7 +3,7 @@
         android:label="youtube_routine_front"
         android:icon="@mipmap/ic_launcher">
         <activity
-            android:name="com.example.youtube_routine_front.MainActivity"
+            android:name="com.lbk6661.youtube_routine_front.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
