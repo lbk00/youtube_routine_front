@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;  // HTTP 요청 라이브러리 추가
 import 'dart:convert';  // jsonEncode 사용을 위한 패키지 추가
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-
+import 'package:app_settings/app_settings.dart';
 
 
 void main() async {
@@ -60,75 +60,67 @@ void main() async {
       ),
     );
   } catch (e) {
-    // print("❌ main() 초기화 중 오류 발생: $e");
+    runApp(MaterialApp(
+      home: Scaffold(body: Center(child: Text("앱 초기화 중 오류가 발생했습니다."))),
+    ));
   }
 }
 
 
 
-// 백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
+//  백그라운드 또는 종료된 상태에서 푸시 알림을 클릭하면 실행될 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  // _handleMessage(message);
 }
 
 //  Firebase 초기화 및 푸시 알림 리스너를 설정
 Future<void> setupFirebaseMessaging() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  NotificationSettings settings = await messaging.requestPermission(
+  //  단순 권한 요청만 함 (SharedPreferences 관련 저장 X)
+  await messaging.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
 
-  if (settings.authorizationStatus == AuthorizationStatus.denied) {
-    // // print("🔴 푸시 알림 권한이 거부됨!");
-    return;
-  }
-
-  // // print("✅ 푸시 알림 권한이 허용됨!");
-
+  // FCM 등록은 권한과 무관하게 계속 진행
   await _registerFcmToken();
-
 }
+
 
 
 // FCM 토큰 저장 및 서버에 등록
 Future<void> _registerFcmToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? existingToken = prefs.getString('fcmToken');
-
-  // 새로운 FCM 토큰 가져오기
-  String? newFcmToken;
   try {
-    newFcmToken = await FirebaseMessaging.instance.getToken();
-    // print("🔥 가져온 FCM Token: $newFcmToken");
-  } catch (e) {
-    // print("❌ FCM 토큰 가져오기 실패: $e");
-    return;
-  }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? existingToken = prefs.getString('fcmToken');
 
-  // 기존 토큰과 다를 경우 서버에 등록
-  if (newFcmToken != null && newFcmToken != existingToken) {
-    // print("📡 서버에 FCM 토큰 등록 요청 중...");
+    String? newFcmToken = await FirebaseMessaging.instance.getToken();
 
-    final response = await http.post(
-      Uri.parse('${dotenv.env['API_URL']}/api/users/register'),
-      body: jsonEncode({"fcmToken": newFcmToken}),
-      headers: {"Content-Type": "application/json"},
-    );
-
-    if (response.statusCode == 200) {
-      // print("✅ 사용자 등록 성공! FCM 토큰을 SharedPreferences에 저장");
-      await prefs.setString('fcmToken', newFcmToken);
-    } else {
-      // print("❌ 사용자 등록 실패: ${response.body}");
+    if (newFcmToken == null) {
+      // FCM 토큰을 못 가져오면 종료
+      return;
     }
-  } else {
-    // print("ℹ️ 기존 FCM 토큰과 동일하여 서버에 전송하지 않음.");
+
+    if (newFcmToken != existingToken) {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['API_URL']}/api/users/register'),
+        body: jsonEncode({"fcmToken": newFcmToken}),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        await prefs.setString('fcmToken', newFcmToken);
+      }
+      // 실패하더라도 앱 크래시 없음
+    }
+    // 기존 토큰과 같으면 아무것도 하지 않음
+  } catch (_) {
+    // 오류 발생 시 무시하고 앱 진행 (출력 없음)
   }
 }
+
 
 
 
@@ -152,7 +144,6 @@ void setupFcmTokenRefreshListener() {
   });
 }
 
-// 서버에 FCM 토큰 업데이트 요청
 // 서버에 FCM 토큰 업데이트 요청 (기존 토큰 + 새로운 토큰)
 Future<void> updateFcmTokenToServer(String newToken) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -1,3 +1,5 @@
+import 'package:app_settings/app_settings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,6 +17,55 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+Future<void> _checkNotificationPermissionAndShowDialog(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final isFirstRun = prefs.getBool('is_first_run') ?? true;
+  final deniedShown = prefs.getBool('denied_permission_alert_shown') ?? false;
+
+  final messaging = FirebaseMessaging.instance;
+  final settings = await messaging.getNotificationSettings();
+
+  // ✅ 최초 실행이면 → 다이얼로그 띄우지 않고, 최초 실행 여부 false로 변경
+  if (isFirstRun) {
+    await prefs.setBool('is_first_run', false);
+    return;
+  }
+
+  // ✅ 최초 실행 이후이고, 권한이 거부됐고, 아직 다이얼로그 안 띄운 상태면
+  if (settings.authorizationStatus == AuthorizationStatus.denied && !deniedShown) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("알림 권한이 꺼져 있어요"),
+        content: Text("운동 루틴 알림을 받으시려면, 설정에서 알림 권한을 켜주세요."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("취소"),
+          ),
+          TextButton(
+            onPressed: () {
+              AppSettings.openAppSettings();
+              Navigator.of(context).pop();
+            },
+            child: Text("설정으로 이동"),
+          ),
+        ],
+      ),
+    );
+
+    await prefs.setBool('denied_permission_alert_shown', true);
+  }
+
+  // ✅ 권한 허용된 경우는 다시 초기화
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    await prefs.remove('denied_permission_alert_shown');
+  }
+}
+
+
+
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> alarms = []; // API에서 가져온 루틴 데이터 저장
   List<bool> alarmStates = []; // ON/OFF 상태 저장
@@ -23,6 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     fetchAlarms(); // 앱 실행 시 API 호출
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkNotificationPermissionAndShowDialog(context);
+    });
   }
 
   String formatTime(String routineTime) {
