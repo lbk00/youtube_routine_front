@@ -26,13 +26,13 @@ Future<void> _checkNotificationPermissionAndShowDialog(BuildContext context) asy
   final messaging = FirebaseMessaging.instance;
   final settings = await messaging.getNotificationSettings();
 
-  // ✅ 최초 실행이면 → 다이얼로그 띄우지 않고, 최초 실행 여부 false로 변경
+  // 최초 실행이면 → 다이얼로그 띄우지 않고, 최초 실행 여부 false로 변경
   if (isFirstRun) {
     await prefs.setBool('is_first_run', false);
     return;
   }
 
-  // ✅ 최초 실행 이후이고, 권한이 거부됐고, 아직 다이얼로그 안 띄운 상태면
+  // 최초 실행 이후이고, 권한이 거부됐고, 아직 다이얼로그 안 띄운 상태면
   if (settings.authorizationStatus == AuthorizationStatus.denied && !deniedShown) {
     showDialog(
       context: context,
@@ -58,7 +58,7 @@ Future<void> _checkNotificationPermissionAndShowDialog(BuildContext context) asy
     await prefs.setBool('denied_permission_alert_shown', true);
   }
 
-  // ✅ 권한 허용된 경우는 다시 초기화
+  // 권한 허용된 경우는 다시 초기화
   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
     await prefs.remove('denied_permission_alert_shown');
   }
@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String? fcmToken = prefs.getString('fcmToken');
 
     if (fcmToken == null) {
-      // print("❌ 저장된 FCM 토큰이 없음!");
+      // print("저장된 FCM 토큰이 없음!");
       return;
     }
     // fcm 토큰으로 조회
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         alarms = data.map((item) {
           String rawTime = item['routineTime']; // 원본 시간값 저장
-          // print("📌 API에서 받은 routineTime: $rawTime"); // 디버깅용 로그
+          // print("API에서 받은 routineTime: $rawTime"); // 디버깅용 로그
 
           return {
             'id': item['id'],
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (response.statusCode == 200) {
-        // // print("✅ 루틴 활성 상태 변경 성공 (ID: $routineId)");
+        // // print("루틴 활성 상태 변경 성공 (ID: $routineId)");
 
         setState(() {
           //  alarms 리스트에서 해당 루틴의 isActive 상태를 반전
@@ -162,10 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         });
       } else {
-        // print("❌ 루틴 활성 상태 변경 실패: ${response.body}");
+        // print("루틴 활성 상태 변경 실패: ${response.body}");
       }
     } catch (error) {
-      // print("❌ 오류 발생: $error");
+      // print("오류 발생: $error");
     }
   }
 
@@ -184,11 +184,11 @@ class _HomeScreenState extends State<HomeScreen> {
               String? fcmToken = prefs.getString('fcmToken'); // 저장된 FCM 토큰 가져오기
 
               if (fcmToken == null) {
-                // print("❌ FCM 토큰이 존재하지 않음!");
+                // print("FCM 토큰이 존재하지 않음!");
                 return;
               }
 
-              // print("✅ AddAlarmScreen에 전달할 FCM Token: $fcmToken");
+              // print("AddAlarmScreen에 전달할 FCM Token: $fcmToken");
 
               final result = await showModalBottomSheet(
                 context: context,
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       'repeatFlag': alarm['repeatFlag'] ?? false,
                     };
 
-                    //  print("📌 [HomeScreen] ModifyAlarmScreen에 넘기는 routineTime: ${routine['routineTime']}");
+                    //  print("[HomeScreen] ModifyAlarmScreen에 넘기는 routineTime: ${routine['routineTime']}");
 
                     showModalBottomSheet(
                       context: context,
@@ -339,11 +339,11 @@ class AlarmTile extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        time, // ⏰ 시간
+                        time, // 시간
                         style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(width: 10), // 간격 추가
-                      Expanded( // ✅ 설명이 길 경우 자동 줄바꿈 또는 생략 처리
+                      Expanded( // 설명이 길 경우 자동 줄바꿈 또는 생략 처리
                         child: Text(
                           description,
                           style: TextStyle(fontSize: 22),
