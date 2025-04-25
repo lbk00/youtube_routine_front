@@ -127,7 +127,7 @@ Future<void> _registerFcmToken() async {
 // FCM 토큰이 갱신될 때 자동으로 업데이트
 void setupFcmTokenRefreshListener() {
   FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-    // print("🔄 새로운 FCM 토큰 감지: $newToken");
+    // print("새로운 FCM 토큰 감지: $newToken");
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? oldToken = prefs.getString('fcmToken');
@@ -139,7 +139,7 @@ void setupFcmTokenRefreshListener() {
       // 서버에도 갱신된 토큰 업데이트 요청
       await updateFcmTokenToServer(newToken);
     } else {
-      // print("ℹ️ FCM 토큰 변경 없음");
+      // print(" FCM 토큰 변경 없음");
     }
   });
 }
@@ -150,7 +150,7 @@ Future<void> updateFcmTokenToServer(String newToken) async {
   String? oldToken = prefs.getString('fcmToken'); // 기존 토큰 가져오기
 
   if (oldToken == null) {
-    // print("❌ 기존 FCM 토큰이 없음! 새 토큰만 저장.");
+    // print("기존 FCM 토큰이 없음! 새 토큰만 저장.");
     await prefs.setString('fcmToken', newToken);
     return;
   }
@@ -167,12 +167,12 @@ Future<void> updateFcmTokenToServer(String newToken) async {
 
 
   if (response.statusCode == 200) {
-    // print("✅ 서버에 FCM 토큰 업데이트 성공!");
+    // print("서버에 FCM 토큰 업데이트 성공");
 
     // 서버 업데이트 성공 시 SharedPreferences 값도 변경
     await prefs.setString('fcmToken', newToken);
   } else {
-    // print("❌ 서버에 FCM 토큰 업데이트 실패: ${response.body}");
+    // print("서버에 FCM 토큰 업데이트 실패: ${response.body}");
   }
 }
 
@@ -321,7 +321,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 테마 적용
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 테마 적용
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),

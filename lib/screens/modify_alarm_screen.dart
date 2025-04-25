@@ -40,12 +40,12 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
   void initState() {
     super.initState();
 
-    // // print("📌 [ModifyAlarmScreen] 받은 routineTime: ${widget.routine['routineTime']}");
+    // // print("[ModifyAlarmScreen] 받은 routineTime: ${widget.routine['routineTime']}");
 
-    // ✅ "routineTime"을 직접 사용하여 변환 (원본 값 사용)
+    // "routineTime"을 직접 사용하여 변환 (원본 값 사용)
     _initializeTime(widget.routine['routineTime'] ?? '00:00');
 
-    // // print("✅ 변환된 시간 - Hour: $selectedHour, Minute: $selectedMinute, Period: $selectedPeriod");
+    // // print("변환된 시간 - Hour: $selectedHour, Minute: $selectedMinute, Period: $selectedPeriod");
 
     periodController = FixedExtentScrollController(initialItem: selectedPeriod == '오전' ? 0 : 1);
     hourController = FixedExtentScrollController(initialItem: selectedHour - 1);
@@ -82,7 +82,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
         selectedHour = 12; // 00:00 → 오전 12시
       } else if (hour < 12) {
         selectedPeriod = '오전';
-        selectedHour = hour; // ✅ 변환 없이 그대로 유지
+        selectedHour = hour; // 변환 없이 그대로 유지
       } else if (hour == 12) {
         selectedPeriod = '오후';
         selectedHour = 12;
@@ -109,7 +109,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
     List<String> englishDays = selectedDays.map((day) => daysMapping[day]!).toList();
 
-    // ✅ 12시간제를 24시간제로 변환
+    // 12시간제를 24시간제로 변환
     int hour = selectedHour;
     if (selectedPeriod == '오후' && hour != 12) {
       hour += 12;
@@ -135,9 +135,9 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       );
 
       if (response.statusCode == 200) {
-        // print("✅ 루틴 수정 성공");
+        // print("루틴 수정 성공");
 
-        // ✅ 수정된 데이터를 `widget.routine`에 반영
+        // 수정된 데이터를 `widget.routine`에 반영
         setState(() {
           widget.routine['time'] = routineTime; // ✅ UI 업데이트
           widget.routine['days'] = englishDays;
@@ -145,16 +145,16 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
           widget.routine['description'] = contentController.text;
           widget.routine['repeatFlag'] = isRepeatEnabled;
 
-          // ✅ 새로운 시간값을 반영하여 업데이트
+          // 새로운 시간값을 반영하여 업데이트
           _updateTimeState(routineTime);
         });
 
         Navigator.pop(context, true); // ✅ true 반환하여 홈 화면에서 fetchAlarms() 실행
       } else {
-        // print("❌ 루틴 수정 실패: ${response.body}");
+        // print(" 루틴 수정 실패: ${response.body}");
       }
     } catch (error) {
-      // print("❌ 오류 발생: $error");
+      // print(" 오류 발생: $error");
     }
   }
 
@@ -193,13 +193,13 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       final response = await http.delete(url);
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        // print("✅ 루틴 삭제 성공");
+        // print("루틴 삭제 성공");
         Navigator.pop(context, true); // ✅ 삭제 성공 후 true 반환하여 홈 화면에서 fetchAlarms() 실행
       } else {
-        // print("❌ 루틴 삭제 실패: ${response.body}");
+        // print("루틴 삭제 실패: ${response.body}");
       }
     } catch (error) {
-      // print("❌ 오류 발생: $error");
+      // print("오류 발생: $error");
     }
   }
 
@@ -212,20 +212,20 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Material(
-          color: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 배경 적용
+          color: Theme.of(context).scaffoldBackgroundColor, // 다크 모드 배경 적용
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           child: SingleChildScrollView(
             controller: scrollController,
             child: Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 적용
+                color: Theme.of(context).scaffoldBackgroundColor, //  다크 모드 적용
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ✅ 상단 헤더
+                  // 상단 헤더
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -240,18 +240,18 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                       ),
                     ],
                   ),
-                  Divider(color: Theme.of(context).dividerColor), // ✅ 다크 모드 적용
+                  Divider(color: Theme.of(context).dividerColor), // 다크 모드 적용
 
-                  // ✅ 시간 선택 UI 수정
+                  // 시간 선택 UI 수정
                   Container(
                     height: 200,
-                    color: Theme.of(context).cardColor, // ✅ 다크 모드 적용
+                    color: Theme.of(context).cardColor, // 다크 모드 적용
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
                           child: CupertinoPicker(
-                            backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ 다크 모드 적용
+                            backgroundColor: Theme.of(context).scaffoldBackgroundColor, // 다크 모드 적용
                             itemExtent: 40,
                             scrollController: periodController,
                             onSelectedItemChanged: (index) {
@@ -296,7 +296,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
 
                   Divider(color: Theme.of(context).dividerColor),
 
-                  // ✅ 유튜브 URL 입력란
+                  // 유튜브 URL 입력란
                   ListTile(
                     title: Text('유튜브 URL', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                     trailing: SizedBox(
@@ -337,7 +337,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                   ),
                   Divider(color: Theme.of(context).dividerColor),
 
-                  // ✅ 요일 선택
+                  // 요일 선택
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                     child: Column(
@@ -353,7 +353,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                               label: Text(day, style: TextStyle(color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16)),
                               selected: isSelected,
                               selectedColor: Colors.blueGrey,
-                              backgroundColor: Theme.of(context).cardColor, // ✅ 다크 모드 적용
+                              backgroundColor: Theme.of(context).cardColor, // 다크 모드 적용
                               showCheckmark: false,
                               padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               onSelected: (selected) {
@@ -373,7 +373,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                   ),
                   Divider(color: Theme.of(context).dividerColor),
 
-                  // ✅ 매주 반복
+                  // 매주 반복
                   ListTile(
                     title: Text('매 주 반복', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
                     trailing: Switch(
@@ -403,7 +403,7 @@ class _ModifyAlarmScreenState extends State<ModifyAlarmScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 15.0),
                     child: Center(
                       child: ElevatedButton(
-                        onPressed: () => _deleteRoutine(widget.routine['id']), // ✅ 삭제 기능 호출
+                        onPressed: () => _deleteRoutine(widget.routine['id']), // 삭제 기능 호출
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueGrey, // 빨간색 버튼
                           padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
