@@ -50,8 +50,10 @@
 4. flutter pub get
 5. flutter build appbundle
 
+> RDS -> 퍼블릭 엑세스 : 아니오로 변경
 
 - D:\Dev\IDE\youtube_routine_front\android\app\src\main\kotlin\com\example\youtube_routine_front 
 - -> Unresolved reference: FlutterActivity : android 프로젝트 open해서 실행
 
 - ### aws regions -> free tier 일때, us-east-1 인지 확인하기
+  
